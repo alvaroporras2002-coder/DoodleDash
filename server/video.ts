@@ -19,7 +19,7 @@ export async function handleVideo(request:Request,env:VideoEnv,fetcher:Fetcher=f
  const authorization=request.headers.get('Authorization');
  if(!authorization?.startsWith('Bearer ')||authorization.length>8192)return message('Vuelve a entrar al juego.',401);
  let body:{code?:unknown;action?:unknown};
- try{const raw=await request.text();if(raw.length>2048)return message('Solicitud demasiado grande.',413);body=JSON.parse(raw);}catch{return message('Solicitud no válida.',400);}
+ try{let raw='';let bytes=0;const reader=request.body?.getReader(),decoder=new TextDecoder();if(reader){while(true){const chunk=await reader.read();if(chunk.done)break;bytes+=chunk.value.byteLength;if(bytes>2048){await reader.cancel();return message('Solicitud demasiado grande.',413);}raw+=decoder.decode(chunk.value,{stream:true});}raw+=decoder.decode();}body=JSON.parse(raw);}catch{return message('Solicitud no válida.',400);}
  if(!body||typeof body!=='object'||typeof body.code!=='string'||!/^([A-F0-9]{6}|[A-F0-9]{12})$/.test(body.code))return message('Código de sala no válido.',400);
  const action=body.action??'join';
  if(typeof action!=='string'||!['join','heartbeat','leave'].includes(action))return message('Acción no válida.',400);

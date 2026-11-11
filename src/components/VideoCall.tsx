@@ -9,7 +9,9 @@ import {VideoError,videoRequest,type VideoTicket} from '../videoApi';
 const options:RoomOptions={adaptiveStream:true,dynacast:true,disconnectOnPageLeave:true,
  audioCaptureDefaults:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},
  videoCaptureDefaults:{resolution:{width:320,height:180,frameRate:15}},
- publishDefaults:{simulcast:true,videoEncoding:{maxBitrate:150_000,maxFramerate:15},videoSimulcastLayers:[VideoPresets.h90],dtx:true,red:true}};
+ publishDefaults:{simulcast:true,videoEncoding:{maxBitrate:150_000,maxFramerate:15},videoSimulcastLayers:[VideoPresets.h90],dtx:true,red:true,stopMicTrackOnMute:true}};
+
+const connectOptions={autoSubscribe:false};
 
 // Mounted once per game room; round changes never reconnect the call.
 export default function VideoCall({code,canJoin=true,inRound=false}:{code:string;canJoin?:boolean;inRound?:boolean}){
@@ -18,7 +20,8 @@ export default function VideoCall({code,canJoin=true,inRound=false}:{code:string
  const panel=useRef<HTMLElement|null>(null),drag=useRef<{x:number;y:number;left:number;top:number}|null>(null);
  useEffect(()=>{setFloating(inRound);setPosition(null)},[inRound]);
  function move(left:number,top:number){const bounds=panel.current?.getBoundingClientRect();if(!bounds)return;setPosition({left:Math.max(8,Math.min(window.innerWidth-bounds.width-8,left)),top:Math.max(8,Math.min(window.innerHeight-bounds.height-8,top))});}
- const grip=<button className="icon-button video-grip" aria-label="Mover panel de llamada" title="Arrastra o usa las flechas para mover el panel" onPointerDown={e=>{const b=panel.current?.getBoundingClientRect();if(!b||!floating)return;drag.current={x:e.clientX,y:e.clientY,left:b.left,top:b.top};e.currentTarget.setPointerCapture(e.pointerId)}} onPointerMove={e=>{if(drag.current)move(drag.current.left+e.clientX-drag.current.x,drag.current.top+e.clientY-drag.current.y)}} onPointerUp={()=>{drag.current=null}} onPointerCancel={()=>{drag.current=null}} onKeyDown={e=>{if(!floating)return;const b=panel.current?.getBoundingClientRect();if(!b)return;const delta:Record<string,[number,number]>={ArrowLeft:[-20,0],ArrowRight:[20,0],ArrowUp:[0,-20],ArrowDown:[0,20]};if(delta[e.key]){e.preventDefault();move(b.left+delta[e.key][0],b.top+delta[e.key][1])}}}><GripHorizontal size={17}/></button>;
+ useEffect(()=>{if(!floating||!ticket)return;const resize=()=>{const b=panel.current?.getBoundingClientRect();if(b)move(b.left,b.top)};window.addEventListener('resize',resize);return()=>window.removeEventListener('resize',resize);},[floating,ticket]);
+ const grip=<button className="icon-button video-grip" aria-label="Mover panel de llamada" title="Arrastra o usa las flechas para mover el panel" onPointerDown={e=>{const b=panel.current?.getBoundingClientRect();if(!b||!floating)return;drag.current={x:e.clientX,y:e.clientY,left:b.left,top:b.top};e.currentTarget.setPointerCapture(e.pointerId)}} onPointerMove={e=>{if(drag.current)move(drag.current.left+e.clientX-drag.current.x,drag.current.top+e.clientY-drag.current.y)}} onPointerUp={()=>{drag.current=null}} onPointerCancel={()=>{drag.current=null}} onLostPointerCapture={()=>{drag.current=null}} onKeyDown={e=>{if(!floating)return;const b=panel.current?.getBoundingClientRect();if(!b)return;const delta:Record<string,[number,number]>={ArrowLeft:[-20,0],ArrowRight:[20,0],ArrowUp:[0,-20],ArrowDown:[0,20]};if(delta[e.key]){e.preventDefault();move(b.left+delta[e.key][0],b.top+delta[e.key][1])}}}><GripHorizontal size={17}/></button>;
  const controller=useRef<AbortController|null>(null),alive=useRef(true),joined=useRef(false),attempt=useRef(0);
  useEffect(()=>{alive.current=true;return()=>{alive.current=false;attempt.current++;controller.current?.abort();if(joined.current)void videoRequest(code,'leave').catch(()=>{});};},[code]);
  function leave(){attempt.current++;controller.current?.abort();setTicket(null);setJoining(false);joined.current=false;void videoRequest(code,'leave').catch(()=>{});}
@@ -42,7 +45,7 @@ export default function VideoCall({code,canJoin=true,inRound=false}:{code:string
   return()=>{stopped=true;clearInterval(timer);window.removeEventListener('online',focus);};
  },[ticket,code]);
  return <section ref={panel} className={`video-call ${ticket&&floating?'video-floating':''}`} style={ticket&&floating&&position?{left:position.left,top:position.top,right:'auto',bottom:'auto'}:undefined} aria-label="Llamada opcional del equipo" data-testid="optional-call">
-  {!ticket?<div className="video-invite"><div className="video-invite-icon"><Headphones size={23}/></div><div><span className="eyebrow">OPCIONAL · HASTA 20 PERSONAS</span><h2>Las reacciones también juegan.</h2><p>Puedes jugar sin llamada o entrar solo para escuchar. Tú decides cuándo activar cámara y micrófono.</p></div><button className="secondary" onClick={()=>void join()} disabled={joining||!canJoin}>{joining?<Loader2 className="spin" size={17}/>:<Headphones size={17}/>} {joining?'Conectando…':'Entrar a la llamada'}</button></div>:<LiveKitRoom data-lk-theme="default" token={ticket.token} serverUrl={ticket.serverUrl} options={options} connectOptions={{autoSubscribe:false}} connect={true} audio={false} video={false} onDisconnected={()=>{if(joined.current){joined.current=false;setTicket(null);setNotice('Saliste de la llamada. Sigues en la partida.');}}} onError={e=>setError(`Llamada: ${e.message}`)}>
+  {!ticket?<div className="video-invite"><div className="video-invite-icon"><Headphones size={23}/></div><div><span className="eyebrow">OPCIONAL · HASTA 20 PERSONAS</span><h2>Las reacciones también juegan.</h2><p>Puedes jugar sin llamada o entrar solo para escuchar. Tú decides cuándo activar cámara y micrófono.</p></div><button className="secondary" onClick={()=>void join()} disabled={joining||!canJoin}>{joining?<Loader2 className="spin" size={17}/>:<Headphones size={17}/>} {joining?'Conectando…':'Entrar a la llamada'}</button></div>:<LiveKitRoom data-lk-theme="default" token={ticket.token} serverUrl={ticket.serverUrl} options={options} connectOptions={connectOptions} connect={true} audio={false} video={false} onDisconnected={()=>{if(joined.current){joined.current=false;setTicket(null);setNotice('Saliste de la llamada. Sigues en la partida.');}}} onError={e=>setError(`Llamada: ${e.message}`)}>
     <CallContent leave={leave} setError={setError} grip={floating?grip:null} floating={floating} toggleFloating={()=>{setFloating(!floating);setPosition(null)}}/>
    </LiveKitRoom>}
   {error&&<div role="alert" className="video-message">{error}<button className="text-button" onClick={()=>setError('')}>Cerrar</button></div>}
@@ -53,7 +56,7 @@ export default function VideoCall({code,canJoin=true,inRound=false}:{code:string
 function CallContent({leave,setError,grip,floating,toggleFloating}:{leave:()=>void;setError:(message:string)=>void;grip:ReactNode;floating:boolean;toggleFloating:()=>void}){
  const room=useRoomContext(),{localParticipant,isMicrophoneEnabled,isCameraEnabled}=useLocalParticipant();
  const participants=useParticipants();
- const media=useTracks([{source:Track.Source.Camera,withPlaceholder:true},Track.Source.Microphone],{onlySubscribed:false});
+ const media=useTracks([{source:Track.Source.Camera,withPlaceholder:true},{source:Track.Source.Microphone,withPlaceholder:false}],{onlySubscribed:false});
  const cameras=useMemo(()=>media.filter(ref=>ref.source===Track.Source.Camera),[media]);
  const [page,setPage]=useState(0),[all,setAll]=useState(false),[collapsed,setCollapsed]=useState(false),[changing,setChanging]=useState(false),[connection,setConnection]=useState(room.state);
  const sorted=[...cameras].sort((a,b)=>a.participant.identity.localeCompare(b.participant.identity));
