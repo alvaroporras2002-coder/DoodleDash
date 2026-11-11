@@ -1,0 +1,45 @@
+import {test,expect} from '@playwright/test';
+test('practice completes a real drawing chain and exports its history',async({page})=>{
+ await page.goto('/');
+ await expect(page.getByRole('heading',{name:/Grandes ideas/})).toBeVisible();
+ await page.getByRole('button',{name:/Prueba el lienzo/}).click();
+ await expect(page.getByText('Práctica individual · sin conexión')).toBeVisible();
+ await page.getByRole('textbox',{name:'Frase de práctica'}).fill('Un gato repartiendo pizza');
+ await page.getByRole('button',{name:/Empezar a dibujar/}).click();
+ const canvas=page.getByTestId('drawing-canvas');
+ await expect(canvas).toBeVisible();
+ await canvas.scrollIntoViewIfNeeded();
+ const box=(await canvas.boundingBox())!;
+ await page.mouse.move(box.x+box.width*.2,box.y+box.height*.2);
+ await page.mouse.down();
+ await page.mouse.move(box.x+box.width*.7,box.y+box.height*.7,{steps:15});
+ await page.mouse.up();
+ await expect(page.getByRole('button',{name:'Deshacer',exact:true})).toBeEnabled();
+ await page.getByRole('button',{name:'Deshacer',exact:true}).click();
+ await page.getByRole('button',{name:/Rehacer/}).click();
+ await page.getByRole('button',{name:'Entregar dibujo'}).click();
+ await page.getByRole('textbox',{name:'Interpretación de práctica'}).fill('Una pizza conducida por un gato');
+ await page.getByRole('button',{name:/Ver mi historia/}).click();
+ await expect(page.getByRole('heading',{name:'Tu primera historia.'})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Un gato repartiendo pizza'})).toBeVisible();
+ await expect(page.locator('.practice-album img')).toHaveAttribute('src',/^data:image\/png;base64,/);
+ const download=page.waitForEvent('download');
+ await page.getByRole('button',{name:'Guardar historia'}).click();
+ expect((await download).suggestedFilename()).toBe('doodledash-practica.json');
+});
+test('Google login never pretends to succeed before configuration',async({page})=>{
+ await page.goto('/?room=ABC123');
+ await page.getByRole('button',{name:'Continuar con Google'}).click();
+ await expect(page.getByRole('status')).toContainText('conectar Supabase');
+ await expect(page.getByText('Te invitaron a la sala')).toBeVisible();
+ await expect(page.getByRole('button',{name:'Crear sala privada'})).toHaveCount(0);
+});
+test('small screen has no horizontal overflow and instructions close',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('/');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBeTruthy();
+ await page.getByRole('button',{name:'Cómo se juega',exact:true}).first().click();
+ await expect(page.getByRole('dialog',{name:'Cómo se juega'})).toBeVisible();
+ await page.keyboard.press('Escape');
+ await expect(page.getByRole('dialog')).toHaveCount(0);
+});
