@@ -18,7 +18,11 @@ jobs:
       - run: npm run build
       - name: Test drawing chain and downloads
         if: always() && success()
-        run: npm test -- --grep 'practice completes'
+        id: drawing
+        run: node scripts/test-ci.mjs 'practice completes'
+      - name: ${{ steps.drawing.outputs.summary || 'Drawing flow result' }}
+        if: always() && !cancelled()
+        run: echo 'Drawing result recorded above'
       - name: Test unconfigured Google access
         if: always() && !cancelled()
         run: npm test -- --grep 'Google login'
