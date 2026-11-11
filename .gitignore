@@ -8,3 +8,5 @@ dist/
 *.tsbuildinfo
 test-results/
 playwright-report/
+.dev.vars
+.dev.vars.*

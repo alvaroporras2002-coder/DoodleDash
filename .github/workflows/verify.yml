@@ -16,6 +16,8 @@ jobs:
           node-version: 22
       - run: npm install --no-audit --no-fund
       - run: npm run build
+      - run: npm run check:video
+      - run: npm run test:video
       - name: Test drawing chain and downloads
         if: always() && success()
         id: drawing
@@ -26,6 +28,9 @@ jobs:
       - name: Test guest access
         if: always() && !cancelled()
         run: npm test -- --grep 'Guest entry'
+      - name: Test optional call and device consent
+        if: always() && !cancelled()
+        run: npm test -- --grep 'optional call'
       - name: Test mobile layout and instructions
         if: always() && !cancelled()
         run: npm test -- --grep 'small screen'
@@ -61,3 +66,5 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/game.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611110002_guest_access.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/guests.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611110003_video_access.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/video.sql

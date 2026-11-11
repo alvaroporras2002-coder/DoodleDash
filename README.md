@@ -44,3 +44,11 @@ Las pruebas automáticas no sustituyen una partida de aceptación con tres sesio
 React + TypeScript + Vite y Canvas en el navegador. Supabase PostgreSQL como autoridad transaccional; Realtime notifica cambios sin publicar respuestas privadas. El cliente solicita solo su tarea. SQL verifica identidad de invitado, membresía, turno y anfitrión, y bloquea cada sala al aplicar acciones concurrentes. Los álbumes se descargan una vez y se conservan en memoria durante la revelación; el respaldo por polling no retransmite sus imágenes.
 
 Las historias se almacenan temporalmente en PostgreSQL y se eliminan después de 24 horas al crear salas o mediante limpieza programada. Revisa las cuotas antes de ampliar el uso. El juego no incluye voz/video integrado, GIF, puntuación competitiva ni todos los modos de Gartic Phone; no se presenta como una copia funcional uno a uno. Las llamadas de Meet/Zoom siguen siendo independientes.
+
+## Llamada opcional para 20 personas
+
+La nueva integración usa LiveKit SFU, con cámara y micrófono apagados inicialmente. Cada jugador decide si entra, solo escucha o activa cada dispositivo. Incluye panel flotante al dibujar, seis cámaras por página y galería de todos. Las nuevas salas admiten 20 jugadores por defecto.
+
+Consulta [la guía de videollamadas](docs/VIDEO.md) para aplicar únicamente la migración 003, crear LiveKit Build gratuito, guardar los secretos en Cloudflare Pages y probar con el equipo. La capacidad configurada es 20; la validación real con 20 cámaras y tus redes queda pendiente de configurar el proveedor y hacer la prueba de aceptación. El plan gratuito tiene cuotas de minutos y transferencia.
+
+El endpoint `/api/video` verifica la sesión y membresía en el servidor. No se exponen credenciales de LiveKit al navegador. La cámara/micrófono requieren consentimiento del jugador. Un error de la llamada no impide seguir jugando.
