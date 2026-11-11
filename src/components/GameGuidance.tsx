@@ -1,3 +1,4 @@
+import {sessionStore} from '../storage';
 import {useEffect,useState,useId} from 'react';
 import {CheckCheck,Check,Play,RotateCcw,ArrowRight} from 'lucide-react';
 import {modes,type Mode,type Player} from '../types';
@@ -10,8 +11,8 @@ export function LobbyReady({players,meId,isHost,busy,onReady,onStart}:{players:P
 }
 
 export function RoundGuide({kind,mode}:{kind:'write'|'draw'|'describe';mode:Mode}){
- const [first]=useState(()=>{try{return sessionStorage.getItem('dd-guide-seen')!=='yes'}catch{return true}});
- useEffect(()=>{try{sessionStorage.setItem('dd-guide-seen','yes')}catch{/* Optional help preference. */}},[]);
+ const [first]=useState(()=>{try{return sessionStore.getItem('dd-guide-seen')!=='yes'}catch{return true}});
+ useEffect(()=>{try{sessionStore.setItem('dd-guide-seen','yes')}catch{/* Optional help preference. */}},[]);
  const title=kind==='write'?'Write a funny phrase':kind==='describe'?'Describe this drawing':mode==='animation'?'Add to this drawing':mode==='memory'?'Look, remember, then draw':'Draw this prompt';
  const detail=kind==='write'?'Try “a cat delivering pizza.” Your teammate will draw it.':kind==='describe'?'Write what you think is happening. Your words become the next prompt.':mode==='memory'?'The reference disappears after 7 seconds. Recreate what you remember.':mode==='animation'?'Your sketch continues the previous frame. Small changes bring the animation to life.':mode==='copy'?'Recreate the reference in your own style. It does not have to be perfect.':'Turn the phrase into a drawing. Simple shapes and silly details are enough.';
  return <aside className="round-guide"><span className="guide-symbol">{kind==='draw'?'✎':'✦'}</span><div><strong>{title}</strong><details open={first||undefined}><summary>Quick tip</summary><p>{detail}</p></details></div></aside>;

@@ -62,6 +62,12 @@ jobs:
         run: echo 'Brand result recorded above'
       - name: Test automatic drawing snapshots
         run: npm test -- --grep 'autosave captures'
+      - name: Test studio usability and performance
+        id: optimization
+        run: node scripts/test-ci.mjs 'studio optimization'
+      - name: ${{ steps.optimization.outputs.summary || 'Optimization result' }}
+        if: always() && !cancelled()
+        run: echo 'Optimization result recorded above'
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

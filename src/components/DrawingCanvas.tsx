@@ -63,7 +63,8 @@ function floodFill(context: CanvasRenderingContext2D, point: Point, color: strin
 export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backgroundImage, draftKey }: DrawingCanvasProps) {
   const draftCallback=useRef(onDraftChange);
   draftCallback.current=onDraftChange;
-  const dirty=useRef(false);
+  const dirty=useRef(false),revision=useRef(0),emitted=useRef(-1),persisted=useRef(-1);
+  const exportCache=useRef<{revision:number;image:string}|null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const backgroundRef = useRef<HTMLImageElement | null>(null);
   const historyRef = useRef<ImageData[]>([]);
@@ -79,17 +80,17 @@ export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backg
   const locked = disabled || loading;
 
   const saveDraft = useCallback(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current||!dirty.current) return;
     if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
     draftTimerRef.current = setTimeout(() => {
       draftTimerRef.current=null;
-      try { if(draftKey)localStorage.setItem(`doodledash:drawing:${draftKey}`, canvasRef.current!.toDataURL('image/png')); }
+      try { if(draftKey&&persisted.current!==revision.current){localStorage.setItem(`doodledash:drawing:${draftKey}`, canvasRef.current!.toDataURL('image/png'));persisted.current=revision.current;} }
       catch { /* A full or unavailable browser store must not interrupt a live round. */ }
-      if(dirty.current&&draftCallback.current)draftCallback.current(exportImage());
+      emitDraft();
     }, 500);
   }, [draftKey]);
 
-  useEffect(()=>{const timer=setInterval(()=>{if(!disabled&&dirty.current&&draftCallback.current&&canvasRef.current)draftCallback.current(exportImage());},1200);return()=>clearInterval(timer);},[disabled]);
+  useEffect(()=>{const timer=setInterval(()=>{if(!disabled)emitDraft();},1200);return()=>clearInterval(timer);},[disabled]);
 
   const checkpoint = useCallback(() => {
     const context = canvasRef.current?.getContext('2d', { willReadFrequently: true });
@@ -110,6 +111,7 @@ export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backg
     let cancelled = false;
     setLoading(true);
     context.clearRect(0, 0, WIDTH, HEIGHT);
+    revision.current++;emitted.current=-1;persisted.current=-1;exportCache.current=null;dirty.current=false;
     gestureRef.current = null;
     historyRef.current = [];
     historyIndexRef.current = -1;
@@ -118,7 +120,7 @@ export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backg
     const finish = () => { if (!cancelled) { checkpoint(); setLoading(false); } };
     if (stored?.startsWith('data:image/png;base64,')) {
       const draft = new Image();
-      draft.onload = () => { if (!cancelled) { context.drawImage(draft, 0, 0, WIDTH, HEIGHT);dirty.current=true; finish(); } };
+      draft.onload = () => { if (!cancelled) { context.drawImage(draft, 0, 0, WIDTH, HEIGHT);dirty.current=true;revision.current++; finish(); } };
       draft.onerror = finish;
       draft.src = stored;
     } else finish();
@@ -130,7 +132,7 @@ export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backg
     if (!backgroundImage) return;
     let cancelled = false;
     const image = new Image();
-    image.onload = () => { if (!cancelled) backgroundRef.current = image; };
+    image.onload = () => { if (!cancelled){backgroundRef.current = image;dirty.current=true;revision.current++;saveDraft();} };
     image.src = backgroundImage;
     return () => { cancelled = true; };
   }, [backgroundImage]);
@@ -141,7 +143,7 @@ export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backg
     const frame = historyRef.current[index];
     const context = canvasRef.current?.getContext('2d');
     if (!frame || !context) return;
-    context.putImageData(frame, 0, 0);dirty.current=true;
+    context.putImageData(frame, 0, 0);dirty.current=true;revision.current++;
     historyIndexRef.current = index;
     setHistoryState({ index, length: historyRef.current.length });
     saveDraft();
@@ -150,15 +152,19 @@ export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backg
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement;
-      if (target.matches('input, textarea, select, [contenteditable="true"]')) return;
+      if (target.closest?.('input, textarea, select, [contenteditable="true"]')||document.querySelector('[role="dialog"][aria-modal="true"]')) return;
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') {
         event.preventDefault();
-        travel(event.shiftKey ? 1 : -1);
+        travel(event.shiftKey ? 1 : -1);return;
       }
+      if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='y'){event.preventDefault();travel(1);return;}
+      if(locked||event.ctrlKey||event.metaKey||event.altKey)return;
+      const shortcuts:Record<string,Tool>={p:'pen',e:'eraser',f:'fill',l:'line',r:'rect',o:'ellipse'};
+      const chosen=shortcuts[event.key.toLowerCase()];if(chosen){event.preventDefault();setTool(chosen);}
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [travel]);
+  }, [travel,locked]);
 
   useEffect(() => {
     if (!disabled || !gestureRef.current) return;
@@ -183,7 +189,7 @@ export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backg
     const context = event.currentTarget.getContext('2d', { willReadFrequently: true });
     if (!context) return;
     const point = coordinates(event);
-    setNotice('');dirty.current=true;
+    setNotice('');dirty.current=true;revision.current++;
     if (tool === 'fill') { floodFill(context, point, color); checkpoint(); return; }
     event.currentTarget.setPointerCapture(event.pointerId);
     gestureRef.current = { start: point, last: point, before: context.getImageData(0, 0, WIDTH, HEIGHT), pointerId: event.pointerId };
@@ -215,6 +221,7 @@ export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backg
       if (tool === 'ellipse') context.ellipse((gesture.start.x + point.x) / 2, (gesture.start.y + point.y) / 2, Math.abs(point.x - gesture.start.x) / 2, Math.abs(point.y - gesture.start.y) / 2, 0, 0, Math.PI * 2);
       context.stroke();
     }
+    revision.current++;
     gesture.last = point;
     saveDraft();
   };
@@ -228,10 +235,16 @@ export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backg
   const clear = () => {
     if (locked || !window.confirm('Clear the whole drawing? You can restore it with Undo.')) return;
     canvasRef.current!.getContext('2d')!.clearRect(0, 0, WIDTH, HEIGHT);
-    dirty.current=true;checkpoint();
+    dirty.current=true;revision.current++;checkpoint();
     setNotice('Canvas cleared. Use Undo to restore your drawing.');
   };
+  function emitDraft(){
+    if(!canvasRef.current||!dirty.current||!draftCallback.current||emitted.current===revision.current)return;
+    const current=revision.current;
+    draftCallback.current(exportImage());emitted.current=current;
+  }
   function exportImage() {
+    if(exportCache.current?.revision===revision.current)return exportCache.current.image;
     const composite = document.createElement('canvas');
     composite.width = WIDTH;
     composite.height = HEIGHT;
@@ -249,6 +262,7 @@ export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backg
       resized.getContext('2d')!.drawImage(composite, 0, 0, resized.width, resized.height);
       result = resized.toDataURL('image/png');
     }
+    exportCache.current={revision:revision.current,image:result};
     return result;
   };
   const download = () => {
@@ -270,7 +284,7 @@ export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backg
   return <section className="drawing-editor" aria-label="Drawing editor">
     <div className="drawing-toolbar">
       <div className="drawing-tools" role="group" aria-label="Tools">
-        {TOOLS.map(({ key, label, Icon }) => <button type="button" key={key} className={`drawing-tool ${tool === key ? 'selected' : ''}`} title={label} aria-label={label} aria-pressed={tool === key} disabled={locked} onClick={() => setTool(key)}><Icon size={19} /></button>)}
+        {TOOLS.map(({ key, label, Icon }) => <button type="button" key={key} className={`drawing-tool ${tool === key ? 'selected' : ''}`} title={`${label} (${{pen:'P',eraser:'E',fill:'F',line:'L',rect:'R',ellipse:'O'}[key]})`} aria-label={label} aria-pressed={tool === key} disabled={locked} onClick={() => setTool(key)}><Icon size={19} /></button>)}
       </div>
       <div className="drawing-colors" role="group" aria-label="Colors">
         {PALETTE.map(value => <button type="button" key={value} className={`drawing-swatch ${color === value ? 'selected' : ''}`} style={{ backgroundColor: value }} aria-label={`Color ${value}`} title={value} aria-pressed={color === value} disabled={locked} onClick={() => setColor(value)} />)}
@@ -290,7 +304,7 @@ export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backg
         <button type="button" className="drawing-tool" aria-label="Clear canvas" title="Clear canvas" onClick={clear} disabled={locked}><Trash2 size={18} /></button>
         <button type="button" className="drawing-tool" aria-label="Download drawing" title="Download PNG" onClick={download} disabled={loading}><Download size={18} /></button>
       </div>
-      <span className="drawing-hint">It does not have to be perfect. Make it yours.</span>
+      <details className="drawing-shortcuts"><summary>Shortcuts</summary><p>P Pencil · E Eraser · F Fill · L Line · R Rectangle · O Ellipse<br/>Ctrl / ⌘ + Z Undo · Ctrl + Y / ⌘ + Shift + Z Redo</p></details>
       <button type="button" className="drawing-submit" disabled={locked} onClick={submit}>Submit drawing <Send size={17} /></button>
     </div>
     {notice && <p className="drawing-notice" role="status">{notice}</p>}
