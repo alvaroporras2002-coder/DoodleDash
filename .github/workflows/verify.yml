@@ -16,7 +16,15 @@ jobs:
           node-version: 22
       - run: npm install --no-audit --no-fund
       - run: npm run build
-      - run: npm test
+      - name: Test drawing chain and downloads
+        if: always() && success()
+        run: npm test -- --grep 'practice completes'
+      - name: Test unconfigured Google access
+        if: always() && !cancelled()
+        run: npm test -- --grep 'Google login'
+      - name: Test mobile layout and instructions
+        if: always() && !cancelled()
+        run: npm test -- --grep 'small screen'
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
