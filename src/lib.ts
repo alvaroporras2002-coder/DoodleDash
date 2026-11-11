@@ -1,12 +1,13 @@
+import {englishError} from './englishErrors';
 import { createClient } from '@supabase/supabase-js';
 const url = import.meta.env.VITE_SUPABASE_URL;
 const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
 export const configured = Boolean(url && key && !url.includes('YOUR_PROJECT') && !key.includes('YOUR_'));
 export const supabase = configured ? createClient(url, key, {auth:{flowType:'pkce',persistSession:true,detectSessionInUrl:true}}) : null;
 export async function rpc<T>(fn:string,args:Record<string,unknown>): Promise<T> {
- if(!supabase) throw new Error('Falta conectar Supabase. Puedes probar el lienzo en la práctica individual.');
+ if(!supabase) throw new Error('Connect Supabase first. You can try the canvas in solo practice.');
  const {data,error} = await supabase.rpc(fn,args);
- if(error) throw new Error(error.message);
+ if(error) throw new Error(englishError(error.message));
  return data as T;
 }
 export function normalizeCode(value:string) { return value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12); }
