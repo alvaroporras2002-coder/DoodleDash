@@ -10,6 +10,7 @@ Original looping-stroke mark, violet ink, lavender paper and leaf-green accents.
 - Seven modes: Drawing Telephone, Quick Sketch, Masterpiece, From Memory, In Motion, Creative Copy and Icebreaker.
 - Private invitations, ready checks, server-owned rounds, reveal timelines, replay and downloads.
 - Canvas with drawing tools, undo, redo, shapes, fill and local drafts.
+- Private server autosave for drawings and phrases, used automatically at timeout without pressing Submit. Requires migration 202611110006_autosave.sql.
 - Optional LiveKit camera and microphone, off until the player chooses otherwise.
 - Responsive layouts, keyboard controls and reduced-motion support.
 
@@ -28,6 +29,6 @@ Production: build `npm run build`, output `dist`, with the root `functions/` dir
 Use `.env.example`, [setup documentation](docs/SETUP.md), and [video documentation](docs/VIDEO.md) for service configuration. Keep LiveKit credentials server-only. Apply the existing SQL migrations in order when setting up a new database.
 
 ## Rebrand deployment
-This is a frontend identity update. Existing rooms, drawing drafts and service bindings remain compatible. No new SQL or secrets are required. Historical storage keys and media-room identifiers are deliberately retained to avoid breaking ongoing games.
+This is a frontend identity update. Existing rooms, drawing drafts and service bindings remain compatible. The identity itself needs no SQL; apply migration 202611110006_autosave.sql for the automatic round-save feature. No new secrets are required. Historical storage keys and media-room identifiers are deliberately retained to avoid breaking ongoing games.
 
 See [deployment notes](docs/REBRAND.md) for the separate hosting-address change. Advertising is not enabled by this rebrand.

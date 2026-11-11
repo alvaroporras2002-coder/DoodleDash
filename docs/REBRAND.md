@@ -3,7 +3,7 @@
 ## Publish the visual redesign
 Merge the DoodleOnline pull request. The connected Cloudflare Pages project builds and deploys main automatically. Refresh the site after the deployment succeeds.
 
-No new database migration, API key, LiveKit project or environment variable is required. Guest sessions, invitations, current rooms, and stored drawing drafts remain compatible.
+The visual identity itself needs no service changes. This branch also includes automatic round saves: apply supabase/migrations/202611110006_autosave.sql in Supabase SQL Editor before publishing. No new API key, LiveKit project or environment variable is required. Guest sessions, invitations, current rooms, and stored drawing drafts remain compatible.
 
 ## Hosting address
 Changing the on-page brand and metadata does not change the existing pages.dev hostname or repository name. To use a DoodleOnline address, either attach a domain you control or create a separately named Cloudflare Pages project if that project name is available.
