@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 test('practice completes a real drawing chain and exports its history',async({page})=>{
  await page.goto('/');
- await expect(page.getByRole('heading',{name:/Less perfect/})).toBeVisible();
+ await expect(page.getByRole('heading',{name:/Draw\. Guess\./})).toBeVisible();
  await page.getByRole('button',{name:/Try the canvas/}).click();
  await expect(page.getByText('Solo practice · offline')).toBeVisible();
  await page.getByRole('textbox',{name:'Practice phrase'}).fill('A cat delivering pizza');
@@ -29,13 +29,13 @@ test('practice completes a real drawing chain and exports its history',async({pa
 });
 test('Guest entry requires a nickname and never simulates a session without configuration',async({page})=>{
  await page.goto('/?room=ABC123');
- const enter=page.getByRole('button',{name:'Join room',exact:true});
+ const enter=page.getByRole('region',{name:'Join a room',exact:true}).getByRole('button',{name:'Join room',exact:true});
  await expect(enter).toBeDisabled();
- await page.getByRole('textbox',{name:'Your nickname'}).fill('Alvaro');
+ await page.getByRole('textbox',{name:'Nickname'}).fill('Alvaro');
  await enter.click();
  await expect(page.getByRole('status')).toContainText('Connect Supabase');
- await expect(page.getByText('You are invited to room')).toBeVisible();
- await expect(page.getByRole('button',{name:'Create a studio'})).toHaveCount(0);
+ await expect(page.getByRole('textbox',{name:'Room code',exact:true})).toHaveValue('ABC123');
+ await expect(page.locator('.room-page')).toHaveCount(0);
  await expect(page.getByRole('button',{name:'Continue with Google'})).toHaveCount(0);
 });
 test('small screen has no horizontal overflow and instructions close',async({page})=>{

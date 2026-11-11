@@ -3,7 +3,7 @@
 An independent online drawing playground for 2–20 people. Write a prompt, pass it on, draw, guess, and reveal a shared collection of unexpected stories.
 
 ## Visual identity
-Original looping-stroke mark, violet ink, lavender paper and leaf-green accents. Native SVG illustrations keep the interface lightweight. All player-facing copy is in English.
+Charcoal surfaces, clean neutral typography, an original abstract-stroke logo and restrained violet/green accents. The home page offers Create room and Join room; modes are chosen inside the lobby. Cameras sit alongside the game on desktop and below it on mobile. All player-facing copy is in English.
 
 ## Play
 - Guest nickname and avatar; no email or password.
