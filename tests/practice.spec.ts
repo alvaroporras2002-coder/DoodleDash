@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 test('practice completes a real drawing chain and exports its history',async({page})=>{
  await page.goto('/');
- await expect(page.getByRole('heading',{name:/Big ideas/})).toBeVisible();
+ await expect(page.getByRole('heading',{name:/Less perfect/})).toBeVisible();
  await page.getByRole('button',{name:/Try the canvas/}).click();
  await expect(page.getByText('Solo practice · offline')).toBeVisible();
  await page.getByRole('textbox',{name:'Practice phrase'}).fill('A cat delivering pizza');
@@ -25,7 +25,7 @@ test('practice completes a real drawing chain and exports its history',async({pa
  await expect(page.locator('.practice-album img')).toHaveAttribute('src',/^data:image\/png;base64,/);
  const download=page.waitForEvent('download');
  await page.getByRole('button',{name:'Save story'}).click();
- expect((await download).suggestedFilename()).toBe('doodledash-practice.json');
+ expect((await download).suggestedFilename()).toBe('doodleonline-practice.json');
 });
 test('Guest entry requires a nickname and never simulates a session without configuration',async({page})=>{
  await page.goto('/?room=ABC123');
@@ -35,7 +35,7 @@ test('Guest entry requires a nickname and never simulates a session without conf
  await enter.click();
  await expect(page.getByRole('status')).toContainText('Connect Supabase');
  await expect(page.getByText('You are invited to room')).toBeVisible();
- await expect(page.getByRole('button',{name:'Create private room'})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Create a studio'})).toHaveCount(0);
  await expect(page.getByRole('button',{name:'Continue with Google'})).toHaveCount(0);
 });
 test('small screen has no horizontal overflow and instructions close',async({page})=>{

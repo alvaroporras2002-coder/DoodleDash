@@ -1,4 +1,4 @@
-name: Verify DoodleDash
+name: Verify DoodleOnline
 on:
   pull_request:
   push:
@@ -53,6 +53,15 @@ jobs:
       - name: Test room clarity and replay
         if: always() && !cancelled()
         run: npm test -- --grep 'room clarity'
+      - name: Test DoodleOnline identity and responsive layouts
+        if: always() && !cancelled()
+        id: brand
+        run: node scripts/test-ci.mjs 'DoodleOnline'
+      - name: ${{ steps.brand.outputs.summary || 'Brand result' }}
+        if: always() && !cancelled()
+        run: echo 'Brand result recorded above'
+      - name: Test automatic drawing snapshots
+        run: npm test -- --grep 'autosave captures'
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -92,3 +101,5 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611110005_english.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/english.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/two_players.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611110006_autosave.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/autosave.sql

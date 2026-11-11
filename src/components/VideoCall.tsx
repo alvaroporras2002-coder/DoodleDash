@@ -100,7 +100,7 @@ function CallContent({leave,setError,grip,floating,toggleFloating,compact}:{comp
  {collapsed&&<p className="video-collapsed">Cameras are minimized. Your camera and microphone keep their current settings.</p>}
  <MicrophoneLevel participant={localParticipant} enabled={isMicrophoneEnabled}/>
  <div className="video-controls"><button className={isMicrophoneEnabled?'secondary':'secondary media-off'} aria-pressed={isMicrophoneEnabled} onClick={()=>void toggle('microphone')} disabled={changing||connection!==ConnectionState.Connected}>{isMicrophoneEnabled?<Mic size={17}/>:<MicOff size={17}/>} {isMicrophoneEnabled?'Mute':'Enable microphone'}</button><button className={isCameraEnabled?'secondary':'secondary media-off'} aria-pressed={isCameraEnabled} onClick={()=>void toggle('camera')} disabled={changing||connection!==ConnectionState.Connected}>{isCameraEnabled?<Camera size={17}/>:<CameraOff size={17}/>} {isCameraEnabled?'Turn camera off':'Enable camera'}</button><button className="secondary leave-call" onClick={leave}><PhoneOff size={17}/>Leave call</button></div>
- <p className="video-privacy">Leaving the call does not leave the game. DoodleDash does not record this call.</p></div>
+ <p className="video-privacy">Leaving the call does not leave the game. DoodleOnline does not record this call.</p></div>
 }
 
 export function MicrophoneLevel({participant,enabled}:{participant:{audioLevel:number};enabled:boolean}){

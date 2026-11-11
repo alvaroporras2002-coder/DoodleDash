@@ -6,13 +6,14 @@ type Tool = 'pen' | 'eraser' | 'fill' | 'line' | 'rect' | 'ellipse';
 type Point = { x: number; y: number };
 export interface DrawingCanvasProps {
   onSubmit: (image: string) => void;
+  onDraftChange?: (image:string) => void;
   disabled?: boolean;
   backgroundImage?: string;
   draftKey?: string;
 }
 const WIDTH = 900;
 const HEIGHT = 560;
-const PALETTE = ['#222222', '#ffffff', '#eb1700', '#ff7a00', '#f5c841', '#48a465', '#1d90c5', '#4956bc', '#ae5bbd', '#ee87a9', '#925d3d', '#a6a6a6'];
+const PALETTE = ['#30253e', '#ffffff', '#7041d6', '#b59ae9', '#cbed8e', '#315b44', '#73ac88', '#82b7c9', '#e8c46e', '#d77c9d', '#d45353', '#a6a6a6'];
 const TOOLS = [
   { key: 'pen', label: 'Pencil', Icon: Pencil },
   { key: 'eraser', label: 'Eraser', Icon: Eraser },
@@ -59,7 +60,10 @@ function floodFill(context: CanvasRenderingContext2D, point: Point, color: strin
   context.putImageData(frame, 0, 0);
 }
 
-export function DrawingCanvas({ onSubmit, disabled = false, backgroundImage, draftKey }: DrawingCanvasProps) {
+export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backgroundImage, draftKey }: DrawingCanvasProps) {
+  const draftCallback=useRef(onDraftChange);
+  draftCallback.current=onDraftChange;
+  const dirty=useRef(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const backgroundRef = useRef<HTMLImageElement | null>(null);
   const historyRef = useRef<ImageData[]>([]);
@@ -67,7 +71,7 @@ export function DrawingCanvas({ onSubmit, disabled = false, backgroundImage, dra
   const gestureRef = useRef<{ start: Point; last: Point; before: ImageData; pointerId: number } | null>(null);
   const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [tool, setTool] = useState<Tool>('pen');
-  const [color, setColor] = useState('#222222');
+  const [color, setColor] = useState('#30253e');
   const [size, setSize] = useState(6);
   const [historyState, setHistoryState] = useState({ index: -1, length: 0 });
   const [notice, setNotice] = useState('');
@@ -75,13 +79,17 @@ export function DrawingCanvas({ onSubmit, disabled = false, backgroundImage, dra
   const locked = disabled || loading;
 
   const saveDraft = useCallback(() => {
-    if (!draftKey || !canvasRef.current) return;
+    if (!canvasRef.current) return;
     if (draftTimerRef.current) clearTimeout(draftTimerRef.current);
     draftTimerRef.current = setTimeout(() => {
-      try { localStorage.setItem(`doodledash:drawing:${draftKey}`, canvasRef.current!.toDataURL('image/png')); }
+      draftTimerRef.current=null;
+      try { if(draftKey)localStorage.setItem(`doodledash:drawing:${draftKey}`, canvasRef.current!.toDataURL('image/png')); }
       catch { /* A full or unavailable browser store must not interrupt a live round. */ }
+      if(dirty.current&&draftCallback.current)draftCallback.current(exportImage());
     }, 500);
   }, [draftKey]);
+
+  useEffect(()=>{const timer=setInterval(()=>{if(!disabled&&dirty.current&&draftCallback.current&&canvasRef.current)draftCallback.current(exportImage());},1200);return()=>clearInterval(timer);},[disabled]);
 
   const checkpoint = useCallback(() => {
     const context = canvasRef.current?.getContext('2d', { willReadFrequently: true });
@@ -110,7 +118,7 @@ export function DrawingCanvas({ onSubmit, disabled = false, backgroundImage, dra
     const finish = () => { if (!cancelled) { checkpoint(); setLoading(false); } };
     if (stored?.startsWith('data:image/png;base64,')) {
       const draft = new Image();
-      draft.onload = () => { if (!cancelled) { context.drawImage(draft, 0, 0, WIDTH, HEIGHT); finish(); } };
+      draft.onload = () => { if (!cancelled) { context.drawImage(draft, 0, 0, WIDTH, HEIGHT);dirty.current=true; finish(); } };
       draft.onerror = finish;
       draft.src = stored;
     } else finish();
@@ -133,7 +141,7 @@ export function DrawingCanvas({ onSubmit, disabled = false, backgroundImage, dra
     const frame = historyRef.current[index];
     const context = canvasRef.current?.getContext('2d');
     if (!frame || !context) return;
-    context.putImageData(frame, 0, 0);
+    context.putImageData(frame, 0, 0);dirty.current=true;
     historyIndexRef.current = index;
     setHistoryState({ index, length: historyRef.current.length });
     saveDraft();
@@ -175,7 +183,7 @@ export function DrawingCanvas({ onSubmit, disabled = false, backgroundImage, dra
     const context = event.currentTarget.getContext('2d', { willReadFrequently: true });
     if (!context) return;
     const point = coordinates(event);
-    setNotice('');
+    setNotice('');dirty.current=true;
     if (tool === 'fill') { floodFill(context, point, color); checkpoint(); return; }
     event.currentTarget.setPointerCapture(event.pointerId);
     gestureRef.current = { start: point, last: point, before: context.getImageData(0, 0, WIDTH, HEIGHT), pointerId: event.pointerId };
@@ -208,6 +216,7 @@ export function DrawingCanvas({ onSubmit, disabled = false, backgroundImage, dra
       context.stroke();
     }
     gesture.last = point;
+    saveDraft();
   };
   const pointerUp = (event: React.PointerEvent<HTMLCanvasElement>) => {
     if (!gestureRef.current || gestureRef.current.pointerId !== event.pointerId) return;
@@ -219,10 +228,10 @@ export function DrawingCanvas({ onSubmit, disabled = false, backgroundImage, dra
   const clear = () => {
     if (locked || !window.confirm('Clear the whole drawing? You can restore it with Undo.')) return;
     canvasRef.current!.getContext('2d')!.clearRect(0, 0, WIDTH, HEIGHT);
-    checkpoint();
+    dirty.current=true;checkpoint();
     setNotice('Canvas cleared. Use Undo to restore your drawing.');
   };
-  const exportImage = () => {
+  function exportImage() {
     const composite = document.createElement('canvas');
     composite.width = WIDTH;
     composite.height = HEIGHT;
@@ -244,7 +253,7 @@ export function DrawingCanvas({ onSubmit, disabled = false, backgroundImage, dra
   };
   const download = () => {
     const link = document.createElement('a');
-    link.download = 'doodledash-drawing.png';
+    link.download = 'doodleonline-drawing.png';
     link.href = exportImage();
     link.click();
   };
