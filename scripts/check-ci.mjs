@@ -1,0 +1,10 @@
+import {spawnSync} from 'node:child_process';
+import {appendFileSync} from 'node:fs';
+const script=process.argv[2];
+const run=spawnSync('npm',['run',script],{encoding:'utf8',maxBuffer:10*1024*1024,timeout:180000});
+console.log(run.stdout);console.error(run.stderr);
+const lines=(run.stdout+'\n'+run.stderr).split('\n');
+const failure=lines.find(l=>l.includes('error TS'))||lines.find(l=>l.includes('not ok'))||lines.find(l=>/Error:|error:/.test(l))||'Check failed; inspect logs';
+const summary=run.status===0?`${script}: passed`:failure.replace(/\u001b\[[0-9;]*m/g,'').replace(/\s+/g,' ').slice(0,350);
+if(process.env.GITHUB_OUTPUT)appendFileSync(process.env.GITHUB_OUTPUT,`summary=${summary}\n`);
+process.exit(run.status??1);

@@ -19,4 +19,4 @@ export const modes: { id: Mode; name: string; tag: string; icon: string; descrip
  {id:'copy',name:'Copia creativa',tag:'DE MANO EN MANO',icon:'▧',description:'Reinterpreta cada dibujo. ¿Cuánto cambiará hasta el final?',color:'pink'},
  {id:'icebreaker',name:'Rompehielos',tag:'PARTIDA CORTA',icon:'☀',description:'Escribe una idea y dibuja la de un compañero. Dos rondas para conectar.',color:'yellow'},
 ];
-export const defaultSettings: Settings = {mode:'classic',seconds:90,maxPlayers:12};
+export const defaultSettings: Settings = {mode:'classic',seconds:90,maxPlayers:20};

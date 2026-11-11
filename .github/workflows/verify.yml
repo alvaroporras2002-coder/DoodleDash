@@ -15,7 +15,25 @@ jobs:
         with:
           node-version: 22
       - run: npm install --no-audit --no-fund
-      - run: npm run build
+      - name: Build application
+        id: build
+        run: node scripts/check-ci.mjs build
+      - name: ${{ steps.build.outputs.summary || 'Build result' }}
+        if: always() && !cancelled()
+        run: echo 'Build result recorded above'
+      - name: Check video server types
+        id: servertypes
+        run: node scripts/check-ci.mjs check:video
+      - name: ${{ steps.servertypes.outputs.summary || 'Server type result' }}
+        if: always() && !cancelled()
+        run: echo 'Server type result recorded above'
+      - name: Test video admission
+        id: servervideo
+        run: node scripts/check-ci.mjs test:video
+      - name: ${{ steps.servervideo.outputs.summary || 'Server test result' }}
+        if: always() && !cancelled()
+        run: echo 'Server test result recorded above'
+
       - name: Test drawing chain and downloads
         if: always() && success()
         id: drawing
@@ -26,6 +44,9 @@ jobs:
       - name: Test guest access
         if: always() && !cancelled()
         run: npm test -- --grep 'Guest entry'
+      - name: Test optional call and device consent
+        if: always() && !cancelled()
+        run: npm test -- --grep 'optional call'
       - name: Test mobile layout and instructions
         if: always() && !cancelled()
         run: npm test -- --grep 'small screen'
@@ -61,3 +82,5 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/game.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611110002_guest_access.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/guests.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611110003_video_access.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/video.sql
