@@ -282,6 +282,10 @@ export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backg
   };
 
   return <section className="drawing-editor" aria-label="Drawing editor">
+    <div className="drawing-paper" style={backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : undefined}>
+      <canvas data-testid="drawing-canvas" ref={canvasRef} width={WIDTH} height={HEIGHT} className={locked ? 'drawing-locked' : tool === 'eraser' ? 'drawing-eraser' : ''} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp} onLostPointerCapture={pointerUp} aria-label="Drawing canvas. Use a mouse or stylus to draw." />
+      {disabled && <div className="drawing-lock-label">Drawing submitted</div>}
+    </div>
     <div className="drawing-toolbar">
       <div className="drawing-tools" role="group" aria-label="Tools">
         {TOOLS.map(({ key, label, Icon }) => <button type="button" key={key} className={`drawing-tool ${tool === key ? 'selected' : ''}`} title={`${label} (${{pen:'P',eraser:'E',fill:'F',line:'L',rect:'R',ellipse:'O'}[key]})`} aria-label={label} aria-pressed={tool === key} disabled={locked} onClick={() => setTool(key)}><Icon size={19} /></button>)}
@@ -291,10 +295,6 @@ export function DrawingCanvas({ onSubmit, onDraftChange, disabled = false, backg
         <label className="drawing-custom-color" title="Choose another color"><input type="color" value={color} onChange={event => setColor(event.target.value)} aria-label="Choose another color" disabled={locked} /></label>
       </div>
       <label className="drawing-width"><span>Size <strong>{size}</strong></span><input type="range" min="2" max="40" value={size} disabled={locked} onChange={event => setSize(Number(event.target.value))} aria-label="Brush size" /></label>
-    </div>
-    <div className="drawing-paper" style={backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : undefined}>
-      <canvas data-testid="drawing-canvas" ref={canvasRef} width={WIDTH} height={HEIGHT} className={locked ? 'drawing-locked' : tool === 'eraser' ? 'drawing-eraser' : ''} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp} onLostPointerCapture={pointerUp} aria-label="Drawing canvas. Use a mouse or stylus to draw." />
-      {disabled && <div className="drawing-lock-label">Drawing submitted</div>}
     </div>
     <div className="drawing-footer">
       <div className="drawing-actions" role="group" aria-label="Drawing actions">

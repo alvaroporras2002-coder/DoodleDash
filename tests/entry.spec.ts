@@ -132,7 +132,7 @@ test('configured entry host chooses modes and updates settings inside the lobby'
  expect(requests.unhandled).toEqual([]);
 });
 
-for(const width of [1440,390]){
+for(const width of [1440,1024,768,390,320]){
  test(`configured entry drawing room keeps an opt-in call beside or below the game at ${width}px`,async({page})=>{
   await page.setViewportSize({width,height:1000});
   const {requests}=await mockRoom(page,{playing:true});
@@ -141,6 +141,8 @@ for(const width of [1440,390]){
   const main=layout.locator(':scope > .room-main');
   const call=layout.locator(':scope > .call-sidebar');
   await expect(layout.locator(':scope > .room-sidebar')).toBeVisible();
+  await expect(page.locator('.room-code-label')).toHaveText(`Room ${roomCode}`);
+  await expect(page.locator('.room-code-label')).toBeVisible();
   await expect(main.getByTestId('drawing-canvas')).toBeVisible();
   await expect(call.getByTestId('optional-call')).toBeVisible();
   await expect(call.getByRole('button',{name:'Join the call',exact:true})).toBeEnabled();
@@ -148,8 +150,11 @@ for(const width of [1440,390]){
   await page.evaluate(()=>document.fonts.ready);
   const mainBox=(await main.boundingBox())!;
   const callBox=(await call.boundingBox())!;
-  if(width===1440)expect(callBox.x).toBeGreaterThanOrEqual(mainBox.x+mainBox.width-1);
+  if(width>800)expect(callBox.x).toBeGreaterThanOrEqual(mainBox.x+mainBox.width-1);
   else expect(callBox.y).toBeGreaterThanOrEqual(mainBox.y+mainBox.height-1);
+  const canvasBox=(await main.getByTestId('drawing-canvas').boundingBox())!;
+  const toolbarBox=(await main.locator('.drawing-toolbar').boundingBox())!;
+  expect(toolbarBox.y).toBeGreaterThanOrEqual(canvasBox.y+canvasBox.height-1);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBeTruthy();
   expect(await page.evaluate(()=>(window as unknown as {entryMediaRequests:number}).entryMediaRequests)).toBe(0);
   expect(requests.video).toBe(0);
