@@ -34,6 +34,8 @@ begin
  if public.game_state(c)->>'status'<>'finished' then raise exception 'Duo finish failed: %',m;end if;
  perform public.game_action(c,'restart');
  if public.game_state(c)->>'status'<>'lobby' then raise exception 'Duo restart failed: %',m;end if;
+ perform pg_temp.duo(2);perform public.game_action(c,'leave');
+ perform pg_temp.duo(1);perform public.game_action(c,'leave');
  end loop;
  rejected:=false;
  begin perform game_private.clean_settings('{"maxPlayers":1}');exception when others then rejected:=true;end;
