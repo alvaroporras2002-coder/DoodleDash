@@ -12,6 +12,7 @@ test('DoodleOnline identity is independent and consistent across home and practi
  const colors=await page.evaluate(()=>({accent:getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),bg:getComputedStyle(document.body).backgroundColor}));
  expect(colors).toEqual({accent:'#7041d6',bg:'rgb(246, 244, 250)'});
  await page.getByRole('button',{name:/Try the canvas/}).click();
+ await page.getByRole('button',{name:'Start drawing',exact:true}).click();
  await expect(page.getByTestId('drawing-canvas')).toBeVisible();
  const download=page.waitForEvent('download');
  await page.getByRole('button',{name:'Download drawing',exact:true}).click();
