@@ -8,12 +8,14 @@ test('practice completes a real drawing chain and exports its history',async({pa
  await page.getByRole('button',{name:/Empezar a dibujar/}).click();
  const canvas=page.getByTestId('drawing-canvas');
  await expect(canvas).toBeVisible();
+ await canvas.scrollIntoViewIfNeeded();
  const box=(await canvas.boundingBox())!;
  await page.mouse.move(box.x+box.width*.2,box.y+box.height*.2);
  await page.mouse.down();
  await page.mouse.move(box.x+box.width*.7,box.y+box.height*.7,{steps:15});
  await page.mouse.up();
- await page.getByRole('button',{name:/Deshacer/}).click();
+ await expect(page.getByRole('button',{name:'Deshacer',exact:true})).toBeEnabled();
+ await page.getByRole('button',{name:'Deshacer',exact:true}).click();
  await page.getByRole('button',{name:/Rehacer/}).click();
  await page.getByRole('button',{name:'Entregar dibujo'}).click();
  await page.getByRole('textbox',{name:'Interpretación de práctica'}).fill('Una pizza conducida por un gato');
