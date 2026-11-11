@@ -13,9 +13,11 @@ export function useRoom(code:string,userId:string|undefined) {
     queued.current=false;
     const previous=snapshot.current;
     const include=!(previous?.code===code&&['reveal','finished'].includes(previous.status)&&previous.albums.length>0);
-    const next=await rpc<GameState>('game_state',{code,include_albums:include});
+    let next=await rpc<GameState>('game_state',{code,include_albums:include});
+    if(!include&&previous?.gameId!==next.gameId&&['reveal','finished'].includes(next.status)){next=await rpc<GameState>('game_state',{code,include_albums:true});}
+
     if(current!==generation.current)return;
-    if(!include&&['reveal','finished'].includes(next.status)&&previous)next.albums=previous.albums;
+    if(!include&&['reveal','finished'].includes(next.status)&&previous?.gameId===next.gameId)next.albums=previous.albums;
     offset.current=Date.parse(next.serverNow)-Date.now();snapshot.current=next;setState(next);setError('');
    } while(queued.current&&current===generation.current);
   }catch(e){if(current===generation.current)setError(e instanceof Error?e.message:'No pudimos actualizar la sala.');}

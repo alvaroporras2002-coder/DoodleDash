@@ -14,7 +14,7 @@ from generate_series(1,6) n;
 
 create temporary table fixture(code text);
 do $$
-declare c text; s jsonb; i integer; j integer; v_version bigint;
+declare c text; s jsonb; i integer; j integer; v_version bigint; v_game_id text; v_previous_game_id text;
   png text:='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jDgoAAAAASUVORK5CYII=';
 begin
   perform pg_temp.as_user(1);
@@ -49,14 +49,14 @@ begin
   perform pg_temp.check_true(s->'albums'='[]'::jsonb,'histories hidden during game');
   for i in 1..3 loop
     perform pg_temp.as_user(i);
-    perform public.game_action(c,'submit',jsonb_build_object('round',0,'text','Frase '||i));
+    perform public.game_action(c,'submit',jsonb_build_object('round',0,'gameId',public.game_state(c)->>'gameId','text','Frase '||i));
   end loop;
   s:=public.game_state(c);
   perform pg_temp.check_true((s->>'round')::int=1,'all submissions advance');
   perform pg_temp.check_true(s#>>'{task,kind}'='draw','draw follows phrase');
   perform pg_temp.check_true(s#>>'{task,prompt}'='Frase 2','deterministic rotation to previous chain');
   begin
-    perform public.game_action(c,'submit','{"round":0,"text":"late"}');
+    perform public.game_action(c,'submit',jsonb_build_object('round',0,'gameId',public.game_state(c)->>'gameId','text','late'));
     raise exception 'FAIL: stale submission accepted';
   exception when raise_exception then
     if SQLERRM like 'FAIL:%' then raise; end if;
@@ -65,8 +65,8 @@ begin
   for j in 1..3 loop
     for i in 1..3 loop
       perform pg_temp.as_user(i);
-      perform public.game_action(c,'submit',case when j%2=1 then jsonb_build_object('round',j,'image',png)
-        else jsonb_build_object('round',j,'text','Descripción '||i) end);
+      perform public.game_action(c,'submit',case when j%2=1 then jsonb_build_object('round',j,'gameId',public.game_state(c)->>'gameId','image',png)
+        else jsonb_build_object('round',j,'gameId',public.game_state(c)->>'gameId','text','Descripción '||i) end);
     end loop;
   end loop;
   s:=public.game_state(c);
@@ -80,10 +80,20 @@ begin
   perform pg_temp.check_true((s->>'revealIndex')::int=11 and s->>'status'='reveal','flattened reveal index');
   perform public.game_action(c,'reveal_next');
   perform pg_temp.check_true(public.game_state(c)->>'status'='finished','last reveal completes');
+  v_game_id:=public.game_state(c)->>'gameId';
+  v_previous_game_id:=v_game_id;
   perform public.game_action(c,'restart');
+  perform pg_temp.check_true(public.game_state(c)->>'gameId'<>v_game_id,'restart invalidates album cache');
+  v_game_id:=public.game_state(c)->>'gameId';
   perform pg_temp.check_true(not exists(select 1 from game_private.entries where room_code=c),'restart clears old answers');
   for i in 2..3 loop perform pg_temp.as_user(i); perform public.game_action(c,'ready','{"ready":true}'); end loop;
   perform pg_temp.as_user(1); perform public.game_action(c,'start');
+  perform pg_temp.check_true(public.game_state(c)->>'gameId'<>v_game_id,'new game has unique cache key');
+  begin
+    perform public.game_action(c,'submit',jsonb_build_object('round',0,'gameId',v_previous_game_id,'text','Old game retry'));
+    raise exception 'FAIL: prior game submission accepted';
+  exception when raise_exception then if SQLERRM like 'FAIL:%' then raise; end if; end;
+  perform pg_temp.check_true(not exists(select 1 from game_private.entries where room_code=c),'prior game submit writes nothing');
   update game_private.rooms set deadline=now()-interval '1 second' where code=c;
   perform pg_temp.as_user(2); perform public.game_action(c,'tick');
   perform pg_temp.check_true((public.game_state(c)->>'round')::int=1,'nonhost advances deadline');

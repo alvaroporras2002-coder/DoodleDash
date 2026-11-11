@@ -37,7 +37,7 @@ npm test
 
 [GitHub Actions](.github/workflows/verify.yml) compila TypeScript, prueba el flujo individual en Chromium y ejecuta [las pruebas del motor](supabase/tests/game.sql) con PostgreSQL 16. `supabase/tests/bootstrap.sql` es exclusivo para una base desechable de CI: **no ejecutarlo en Supabase real**.
 
-Las pruebas automáticas no sustituyen una partida de aceptación con tres cuentas Google reales después de configurar los servicios. Este entorno de edición no pudo instalar dependencias ni ejecutar PostgreSQL; consulta los checks del PR antes de hacer merge.
+Las pruebas automáticas no sustituyen una partida de aceptación con tres cuentas Google reales después de configurar los servicios. Consulta los checks del PR antes de hacer merge.
 
 ## Arquitectura
 

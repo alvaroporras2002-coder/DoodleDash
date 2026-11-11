@@ -14,6 +14,7 @@ revoke all on public.allowed_domains from public, anon, authenticated;
 create table game_private.rooms (
   code text primary key,
   host_id uuid not null,
+  game_id uuid not null default gen_random_uuid(),
   status text not null default 'lobby' check (status in ('lobby','playing','reveal','finished')),
   settings jsonb not null,
   round integer not null default 0,
@@ -228,7 +229,7 @@ begin
       left join game_private.players p on p.room_code=v_code and p.user_id=ord.id
     ) a;
   end if;
-  return jsonb_build_object('code',r.code,'hostId',r.host_id,'status',r.status,'settings',r.settings,
+  return jsonb_build_object('code',r.code,'gameId',r.game_id,'hostId',r.host_id,'status',r.status,'settings',r.settings,
     'players',v_players,'canClaimHost',r.host_id<>v_id and not exists(select 1 from game_private.players hp where hp.room_code=v_code and hp.user_id=r.host_id and hp.last_seen>clock_timestamp()-interval '60 seconds'),'round',r.round,'totalRounds',r.total_rounds,'deadline',r.deadline,
     'task',v_task,'albums',v_albums,'albumsIncluded',include_albums,'revealIndex',r.reveal_index,'reactions',r.reactions,'serverNow',clock_timestamp());
 end $$;
@@ -275,11 +276,12 @@ begin
     if exists(select 1 from game_private.players p where p.room_code=v_code and p.active and not p.ready and p.user_id<>r.host_id) then
       raise exception 'Espera a que todos estén listos.';
     end if;
-    update game_private.rooms set status='playing',round=0,order_ids=v_order,reveal_index=0,reactions='[]',
+    update game_private.rooms set status='playing',game_id=gen_random_uuid(),round=0,order_ids=v_order,reveal_index=0,reactions='[]',
       total_rounds=case when r.settings->>'mode'='icebreaker' then 2 else cardinality(v_order)+(cardinality(v_order)%2) end,
       deadline=clock_timestamp()+make_interval(secs=>game_private.effective_seconds(r.settings)) where game_private.rooms.code=v_code;
   when 'submit' then
     if r.status<>'playing' then raise exception 'Esta ronda ya terminó.'; end if;
+    if coalesce(payload->>'gameId','')<>r.game_id::text then raise exception 'Esta partida ya terminó. Actualiza tu sala.'; end if;
     if coalesce((payload->>'round')::integer,-1)<>r.round then raise exception 'Esta ronda ya terminó. Actualiza tu partida.'; end if;
     if r.deadline<=clock_timestamp() then
       perform game_private.advance(v_code);
@@ -314,7 +316,7 @@ begin
   when 'restart' then
     if r.status not in ('reveal','finished') then raise exception 'Termina la partida antes de volver a empezar.'; end if;
     delete from game_private.entries where room_code=v_code;
-    update game_private.rooms set status='lobby',round=0,total_rounds=0,deadline=null,order_ids='{}',reveal_index=0,reactions='[]'
+    update game_private.rooms set status='lobby',game_id=gen_random_uuid(),round=0,total_rounds=0,deadline=null,order_ids='{}',reveal_index=0,reactions='[]'
       where game_private.rooms.code=v_code;
     update game_private.players set ready=(user_id=r.host_id) where room_code=v_code and active;
   when 'leave','kick' then

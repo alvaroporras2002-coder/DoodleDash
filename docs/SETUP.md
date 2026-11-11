@@ -115,10 +115,10 @@ Los proyectos gratuitos pueden pausarse por poca actividad. Antes de una activid
 
 - Solo `game_create`, `game_join`, `game_state` y `game_action` cambian o devuelven estado de juego. Todas validan identidad y dominio en el servidor.
 - Una fila bloqueada por sala serializa inicios, envíos, temporizadores y salidas. El cliente no decide asignaciones, autorías ni horas límite.
-- `game_action('submit')` exige `payload.round` para rechazar respuestas de rondas antiguas. Un segundo envío de la misma ronda no sobrescribe el primero.
+- `game_action('submit')` exige `payload.round` y `payload.gameId` para rechazar respuestas de rondas o partidas antiguas, incluso si la sala se reinició con el mismo código. Un segundo envío de la misma ronda no sobrescribe el primero.
 - El esquema `game_private` no concede acceso a `anon` ni `authenticated`. Los permisos de anfitrión se verifican en cada operación.
 - RLS de `room_events` solo permite leer el contador de una sala a sus miembros activos autorizados. Los eventos no contienen frases ni dibujos.
-- `game_state(code, include_albums)` permite pedir metadatos con `include_albums=false` después de guardar los álbumes en caché. Descarga las imágenes una sola vez por partida; las reacciones y los pasos de revelación no necesitan retransmitirlas.
+- `game_state(code, include_albums)` permite pedir metadatos con `include_albums=false` después de guardar los álbumes en caché. El snapshot incluye `gameId`, que cambia al reiniciar e iniciar otra partida: la caché debe usar esa identidad, no solo el código de sala. Si cambia `gameId` al reconectar directamente a una revelación, vuelve a consultar con `include_albums=true`. Descarga las imágenes una sola vez por partida; las reacciones y los pasos de revelación no necesitan retransmitirlas.
 - Las respuestas completas solo se devuelven en estados `reveal` y `finished`; la presentación gradual es una experiencia compartida y no un mecanismo adicional de confidencialidad entre miembros durante la revelación.
 - El cliente envía `game_action` con `action: 'heartbeat'` cada 15 segundos mientras está en una sala. Actualiza la presencia sin emitir eventos. El snapshot incluye `players[].online` y `canClaimHost`; `claim_host` solo permite tomar el control cuando han pasado 60 segundos sin actividad del anfitrión.
 - Los temporizadores usan la hora del servidor. Cualquier miembro puede enviar `tick` tras vencer el plazo. Quien abandona no bloquea futuras rondas.
@@ -130,7 +130,7 @@ Ejemplo de envío (cliente Supabase):
 await supabase.rpc('game_action', {
   code: 'ABC123',
   action: 'submit',
-  payload: { round: 1, image: 'data:image/webp;base64,...' }
+  payload: { round: 1, gameId: estado.gameId, image: 'data:image/webp;base64,...' }
 });
 ```
 

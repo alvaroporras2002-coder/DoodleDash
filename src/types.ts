@@ -4,7 +4,7 @@ export type Player = { id: string; name: string; avatar: string; ready: boolean;
 export type Entry = { playerId: string; name: string; kind: 'write'|'draw'|'describe'; text?: string; image?: string; round: number };
 export type Album = { id: string; author: string; entries: Entry[] };
 export type GameState = {
- canClaimHost?: boolean; code: string; hostId: string; status: 'lobby'|'playing'|'reveal'|'finished'; settings: Settings;
+ gameId: string; canClaimHost?: boolean; code: string; hostId: string; status: 'lobby'|'playing'|'reveal'|'finished'; settings: Settings;
  players: Player[]; round: number; totalRounds: number; deadline: string|null;
  task: { kind: 'write'|'draw'|'describe'; prompt?: string; image?: string; chainId: string }|null;
  albums: Album[]; revealIndex: number; reactions: {name:string;emoji:string}[]; serverNow: string;
