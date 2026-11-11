@@ -12,7 +12,7 @@ export interface DrawingCanvasProps {
 }
 const WIDTH = 900;
 const HEIGHT = 560;
-const PALETTE = ['#222222', '#ffffff', '#eb1700', '#ff7a00', '#f5c841', '#48a465', '#1d90c5', '#4956bc', '#ae5bbd', '#ee87a9', '#925d3d', '#a6a6a6'];
+const PALETTE = ['#30253e', '#ffffff', '#7041d6', '#b59ae9', '#cbed8e', '#315b44', '#73ac88', '#82b7c9', '#e8c46e', '#d77c9d', '#d45353', '#a6a6a6'];
 const TOOLS = [
   { key: 'pen', label: 'Pencil', Icon: Pencil },
   { key: 'eraser', label: 'Eraser', Icon: Eraser },
@@ -67,7 +67,7 @@ export function DrawingCanvas({ onSubmit, disabled = false, backgroundImage, dra
   const gestureRef = useRef<{ start: Point; last: Point; before: ImageData; pointerId: number } | null>(null);
   const draftTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [tool, setTool] = useState<Tool>('pen');
-  const [color, setColor] = useState('#222222');
+  const [color, setColor] = useState('#30253e');
   const [size, setSize] = useState(6);
   const [historyState, setHistoryState] = useState({ index: -1, length: 0 });
   const [notice, setNotice] = useState('');
@@ -244,7 +244,7 @@ export function DrawingCanvas({ onSubmit, disabled = false, backgroundImage, dra
   };
   const download = () => {
     const link = document.createElement('a');
-    link.download = 'doodledash-drawing.png';
+    link.download = 'doodleonline-drawing.png';
     link.href = exportImage();
     link.click();
   };

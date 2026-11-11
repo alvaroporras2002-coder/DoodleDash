@@ -9,10 +9,10 @@ export type GameState = {
  task: { kind: 'write'|'draw'|'describe'; prompt?: string; image?: string; chainId: string }|null;
  albums: Album[]; revealIndex: number; reactions: {name:string;emoji:string}[]; serverNow: string;
 };
-export const avatars = ['🍒','🍕','🥑','🍩','🌮','🍔','🍋','🥨','🍓','🍣','🧁','🥝'];
+export const avatars = ['🎨','🪴','🌙','✏️','🦋','🪻','🌿','🪐','🖌️','☁️','⭐','🍄'];
 export const modes: { id: Mode; name: string; tag: string; icon: string; description: string; color: string }[] = [
- {id:'classic',name:'Drawing Telephone',tag:'THE FAVORITE',icon:'☎',description:'One phrase, one drawing, and plenty of unexpected interpretations.',color:'peach'},
- {id:'speed',name:'Express Delivery',tag:'FASTER',icon:'⚡',description:'The same chain, with half the time. Trust your first sketch.',color:'yellow'},
+ {id:'classic',name:'Drawing Telephone',tag:'THE ORIGINAL',icon:'〰',description:'One phrase, one drawing, and plenty of unexpected interpretations.',color:'peach'},
+ {id:'speed',name:'Quick Sketch',tag:'FASTER',icon:'⚡',description:'The same chain, with half the time. Trust your first sketch.',color:'yellow'},
  {id:'masterpiece',name:'Masterpiece',tag:'TAKE YOUR TIME',icon:'✦',description:'Double the time to turn your creative chaos into art.',color:'purple'},
  {id:'memory',name:'From Memory',tag:'REMEMBER IT',icon:'◉',description:'Look at the drawing for a few seconds. Then recreate it from memory.',color:'mint'},
  {id:'animation',name:'In Motion',tag:'FRAME BY FRAME',icon:'▶',description:'Build on the previous drawing and reveal the final animation.',color:'blue'},
