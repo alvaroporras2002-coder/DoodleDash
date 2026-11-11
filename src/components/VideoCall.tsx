@@ -1,9 +1,10 @@
 import {useEffect,useMemo,useRef,useState,type ReactNode} from 'react';
-import {LiveKitRoom,ParticipantTile,RoomAudioRenderer,StartAudio,useLocalParticipant,useParticipants,useRoomContext,useTracks} from '@livekit/components-react';
+import {LiveKitRoom,ParticipantTile,RoomAudioRenderer,useLocalParticipant,useParticipants,useRoomContext,useTracks} from '@livekit/components-react';
 import {ConnectionState,RoomEvent,Track,VideoPresets,type RoomOptions} from 'livekit-client';
 import {Camera,CameraOff,ChevronDown,ChevronLeft,ChevronRight,ChevronUp,Headphones,Loader2,Mic,MicOff,PhoneOff,Users,PictureInPicture2,GripHorizontal} from 'lucide-react';
 import '@livekit/components-styles';
 import './VideoCall.css';
+import {syncCallSubscriptions} from '../callSubscriptions';
 import {VideoError,videoRequest,type VideoTicket} from '../videoApi';
 
 const options:RoomOptions={adaptiveStream:true,dynacast:true,disconnectOnPageLeave:true,
@@ -58,19 +59,30 @@ function CallContent({leave,setError,grip,floating,toggleFloating}:{leave:()=>vo
  const participants=useParticipants();
  const media=useTracks([{source:Track.Source.Camera,withPlaceholder:true},{source:Track.Source.Microphone,withPlaceholder:false}],{onlySubscribed:false});
  const cameras=useMemo(()=>media.filter(ref=>ref.source===Track.Source.Camera),[media]);
- const [page,setPage]=useState(0),[all,setAll]=useState(false),[collapsed,setCollapsed]=useState(false),[changing,setChanging]=useState(false),[connection,setConnection]=useState(room.state);
+ const [page,setPage]=useState(0),[all,setAll]=useState(false),[collapsed,setCollapsed]=useState(false),[changing,setChanging]=useState(false),[connection,setConnection]=useState(room.state),[audioReady,setAudioReady]=useState(room.canPlaybackAudio);
  const sorted=[...cameras].sort((a,b)=>a.participant.identity.localeCompare(b.participant.identity));
  const pageSize=all?20:6,pages=Math.max(1,Math.ceil(sorted.length/pageSize)),current=Math.min(page,pages-1);
  const visible=collapsed?[]:sorted.slice(current*pageSize,(current+1)*pageSize);
  const visibleIds=visible.map(t=>t.participant.identity).join(',');
  useEffect(()=>{
-  const allowed=new Set(visibleIds.split(','));
-  for(const p of room.remoteParticipants.values())for(const publication of p.trackPublications.values()){
-   const subscribe=publication.source===Track.Source.Microphone||(publication.source===Track.Source.Camera&&allowed.has(p.identity));
-   if(publication.isSubscribed!==subscribe)publication.setSubscribed(subscribe);
-  }
- },[room,visibleIds,cameras]);
- useEffect(()=>{const handler=(value:ConnectionState)=>setConnection(value);room.on(RoomEvent.ConnectionStateChanged,handler);return()=>{room.off(RoomEvent.ConnectionStateChanged,handler);};},[room]);
+  const sync=()=>syncCallSubscriptions(room.remoteParticipants.values(),new Set(visibleIds.split(',')));
+  // Publications can arrive after a participant's camera; listen independently of the gallery.
+  const events=[RoomEvent.TrackPublished,RoomEvent.TrackUnpublished,RoomEvent.TrackMuted,RoomEvent.TrackUnmuted,RoomEvent.ParticipantConnected,RoomEvent.Reconnected,RoomEvent.Connected] as const;
+  for(const event of events)room.on(event,sync);
+  sync();
+  return()=>{for(const event of events)room.off(event,sync);};
+ },[room,visibleIds]);
+ useEffect(()=>{
+  const handler=(value:ConnectionState)=>setConnection(value);
+  const playback=()=>setAudioReady(room.canPlaybackAudio);
+  room.on(RoomEvent.ConnectionStateChanged,handler);room.on(RoomEvent.AudioPlaybackStatusChanged,playback);
+  playback();
+  return()=>{room.off(RoomEvent.ConnectionStateChanged,handler);room.off(RoomEvent.AudioPlaybackStatusChanged,playback);};
+ },[room]);
+ async function enableSound(){
+  try{await room.startAudio();setAudioReady(room.canPlaybackAudio);setError('');}
+  catch{setError('El navegador bloqueó el sonido. Permite reproducir audio para este sitio y vuelve a pulsar Escuchar voces.');}
+ }
  async function toggle(kind:'camera'|'microphone'){
   setChanging(true);setError('');
   try{if(kind==='camera')await localParticipant.setCameraEnabled(!isCameraEnabled);else await localParticipant.setMicrophoneEnabled(!isMicrophoneEnabled);}
@@ -78,8 +90,9 @@ function CallContent({leave,setError,grip,floating,toggleFloating}:{leave:()=>vo
   finally{setChanging(false)}
  }
  return <><div className="video-heading">{grip}<div><span className="eyebrow">LLAMADA DEL EQUIPO</span><strong><Users size={15}/>{participants.length}/20 en la llamada</strong></div><span className="video-quality">{connection===ConnectionState.Connected?'Conectados · video ligero':connection===ConnectionState.Reconnecting?'Reconectando…':'Conectando…'}</span><button className="icon-button" aria-label={floating?'Fijar llamada en la página':'Flotar llamada sobre el juego'} onClick={toggleFloating}><PictureInPicture2 size={17}/></button><button className="icon-button" onClick={()=>setCollapsed(!collapsed)} aria-label={collapsed?'Mostrar cámaras':'Minimizar cámaras'}>{collapsed?<ChevronDown/>:<ChevronUp/>}</button></div>
- <RoomAudioRenderer/>
- <StartAudio label="Activar sonido de la llamada" className="secondary video-start-audio"/>
+ <RoomAudioRenderer volume={1}/>
+ <button className="secondary video-start-audio" onClick={()=>void enableSound()} disabled={connection!==ConnectionState.Connected}><Headphones size={17}/>{audioReady?'Sonido habilitado · reactivar audio':'Escuchar voces · activar sonido'}</button>
+ {!isMicrophoneEnabled&&<p className="video-privacy" role="status">Tu micrófono está apagado. Pulsa Activar micrófono para que los demás te escuchen; activar la cámara no activa tu voz.</p>}
  {!collapsed&&<><div className={`video-grid ${all?'video-gallery':''}`} data-testid="call-camera-grid">{visible.map(ref=><ParticipantTile key={ref.participant.identity} trackRef={ref}/>)}</div><div className="video-pagination"><span>{all?'Vista de todos · mayor consumo de datos':'Hasta seis cámaras a la vez para cuidar tu conexión'}</span><div><button className="text-button" onClick={()=>{setAll(!all);setPage(0)}}>{all?'Ver por páginas':'Ver a todos'}</button>{!all&&<><button className="icon-button" aria-label="Cámaras anteriores" disabled={current===0} onClick={()=>setPage(current-1)}><ChevronLeft size={16}/></button><small>{current+1}/{pages}</small><button className="icon-button" aria-label="Cámaras siguientes" disabled={current>=pages-1} onClick={()=>setPage(current+1)}><ChevronRight size={16}/></button></>}</div></div></>}
  {collapsed&&<p className="video-collapsed">Las cámaras están minimizadas. Tu cámara y micrófono conservan el estado de sus botones.</p>}
  <div className="video-controls"><button className={isMicrophoneEnabled?'secondary':'secondary media-off'} aria-pressed={isMicrophoneEnabled} onClick={()=>void toggle('microphone')} disabled={changing||connection!==ConnectionState.Connected}>{isMicrophoneEnabled?<Mic size={17}/>:<MicOff size={17}/>} {isMicrophoneEnabled?'Silenciar':'Activar micrófono'}</button><button className={isCameraEnabled?'secondary':'secondary media-off'} aria-pressed={isCameraEnabled} onClick={()=>void toggle('camera')} disabled={changing||connection!==ConnectionState.Connected}>{isCameraEnabled?<Camera size={17}/>:<CameraOff size={17}/>} {isCameraEnabled?'Apagar cámara':'Activar cámara'}</button><button className="secondary leave-call" onClick={leave}><PhoneOff size={17}/>Salir de la llamada</button></div>
