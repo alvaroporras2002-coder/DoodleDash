@@ -20,7 +20,7 @@ export function useRoom(code:string,userId:string|undefined) {
     if(!include&&['reveal','finished'].includes(next.status)&&previous?.gameId===next.gameId)next.albums=previous.albums;
     offset.current=Date.parse(next.serverNow)-Date.now();snapshot.current=next;setState(next);setError('');
    } while(queued.current&&current===generation.current);
-  }catch(e){if(current===generation.current)setError(e instanceof Error?e.message:'No pudimos actualizar la sala.');}
+  }catch(e){if(current===generation.current)setError(e instanceof Error?e.message:'We could not refresh the room.');}
   finally{pending.current=false;}
  },[code,userId]);
  useEffect(()=>{
@@ -47,7 +47,7 @@ export function useRoom(code:string,userId:string|undefined) {
  const action=useCallback(async(action:string,payload:Record<string,unknown>={})=>{
   setBusy(true);setError('');
   try{await rpc('game_action',{code,action,payload});await refresh();}
-  catch(e){setError(e instanceof Error?e.message:'No pudimos completar la acción.');throw e;}
+  catch(e){setError(e instanceof Error?e.message:'We could not complete the action.');throw e;}
   finally{setBusy(false);}
  },[code,refresh]);
  return{state,error,connected,busy,action,refresh,offset};

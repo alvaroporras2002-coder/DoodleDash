@@ -86,3 +86,6 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/video.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611110004_two_players.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/two_players.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611110005_english.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/english.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/two_players.sql

@@ -14,12 +14,12 @@ const WIDTH = 900;
 const HEIGHT = 560;
 const PALETTE = ['#222222', '#ffffff', '#eb1700', '#ff7a00', '#f5c841', '#48a465', '#1d90c5', '#4956bc', '#ae5bbd', '#ee87a9', '#925d3d', '#a6a6a6'];
 const TOOLS = [
-  { key: 'pen', label: 'Lápiz', Icon: Pencil },
-  { key: 'eraser', label: 'Borrador', Icon: Eraser },
-  { key: 'fill', label: 'Rellenar', Icon: PaintBucket },
-  { key: 'line', label: 'Línea', Icon: Minus },
-  { key: 'rect', label: 'Rectángulo', Icon: Square },
-  { key: 'ellipse', label: 'Elipse', Icon: Circle },
+  { key: 'pen', label: 'Pencil', Icon: Pencil },
+  { key: 'eraser', label: 'Eraser', Icon: Eraser },
+  { key: 'fill', label: 'Fill', Icon: PaintBucket },
+  { key: 'line', label: 'Line', Icon: Minus },
+  { key: 'rect', label: 'Rectangle', Icon: Square },
+  { key: 'ellipse', label: 'Ellipse', Icon: Circle },
 ] as const;
 
 /** Fill the connected area without recursively exhausting the browser stack. */
@@ -217,10 +217,10 @@ export function DrawingCanvas({ onSubmit, disabled = false, backgroundImage, dra
     checkpoint();
   };
   const clear = () => {
-    if (locked || !window.confirm('¿Borrar todo el dibujo? Podrás recuperarlo con Deshacer.')) return;
+    if (locked || !window.confirm('Clear the whole drawing? You can restore it with Undo.')) return;
     canvasRef.current!.getContext('2d')!.clearRect(0, 0, WIDTH, HEIGHT);
     checkpoint();
-    setNotice('Lienzo limpio. Puedes deshacer para recuperar el dibujo.');
+    setNotice('Canvas cleared. Use Undo to restore your drawing.');
   };
   const exportImage = () => {
     const composite = document.createElement('canvas');
@@ -244,7 +244,7 @@ export function DrawingCanvas({ onSubmit, disabled = false, backgroundImage, dra
   };
   const download = () => {
     const link = document.createElement('a');
-    link.download = 'doodledash-dibujo.png';
+    link.download = 'doodledash-drawing.png';
     link.href = exportImage();
     link.click();
   };
@@ -252,37 +252,37 @@ export function DrawingCanvas({ onSubmit, disabled = false, backgroundImage, dra
     if (locked) return;
     const pixels = canvasRef.current!.getContext('2d')!.getImageData(0, 0, WIDTH, HEIGHT).data;
     const hasInk = pixels.some((value, index) => index % 4 === 3 && value > 0);
-    if (!hasInk && !backgroundRef.current && !window.confirm('Tu lienzo está vacío. ¿Quieres entregarlo así?')) return;
+    if (!hasInk && !backgroundRef.current && !window.confirm('Your canvas is empty. Submit it anyway?')) return;
     const image = exportImage();
-    if (image.length > 450_000) { setNotice('El dibujo es demasiado grande. Prueba a simplificarlo antes de entregarlo.'); return; }
+    if (image.length > 450_000) { setNotice('The drawing is too large. Try simplifying it before submitting.'); return; }
     onSubmit(image);
   };
 
-  return <section className="drawing-editor" aria-label="Editor de dibujo">
+  return <section className="drawing-editor" aria-label="Drawing editor">
     <div className="drawing-toolbar">
-      <div className="drawing-tools" role="group" aria-label="Herramientas">
+      <div className="drawing-tools" role="group" aria-label="Tools">
         {TOOLS.map(({ key, label, Icon }) => <button type="button" key={key} className={`drawing-tool ${tool === key ? 'selected' : ''}`} title={label} aria-label={label} aria-pressed={tool === key} disabled={locked} onClick={() => setTool(key)}><Icon size={19} /></button>)}
       </div>
-      <div className="drawing-colors" role="group" aria-label="Colores">
+      <div className="drawing-colors" role="group" aria-label="Colors">
         {PALETTE.map(value => <button type="button" key={value} className={`drawing-swatch ${color === value ? 'selected' : ''}`} style={{ backgroundColor: value }} aria-label={`Color ${value}`} title={value} aria-pressed={color === value} disabled={locked} onClick={() => setColor(value)} />)}
-        <label className="drawing-custom-color" title="Elegir otro color"><input type="color" value={color} onChange={event => setColor(event.target.value)} aria-label="Elegir otro color" disabled={locked} /></label>
+        <label className="drawing-custom-color" title="Choose another color"><input type="color" value={color} onChange={event => setColor(event.target.value)} aria-label="Choose another color" disabled={locked} /></label>
       </div>
-      <label className="drawing-width"><span>Grosor <strong>{size}</strong></span><input type="range" min="2" max="40" value={size} disabled={locked} onChange={event => setSize(Number(event.target.value))} aria-label="Grosor del pincel" /></label>
+      <label className="drawing-width"><span>Size <strong>{size}</strong></span><input type="range" min="2" max="40" value={size} disabled={locked} onChange={event => setSize(Number(event.target.value))} aria-label="Brush size" /></label>
     </div>
     <div className="drawing-paper" style={backgroundImage ? { backgroundImage: `url(${backgroundImage})` } : undefined}>
-      <canvas data-testid="drawing-canvas" ref={canvasRef} width={WIDTH} height={HEIGHT} className={locked ? 'drawing-locked' : tool === 'eraser' ? 'drawing-eraser' : ''} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp} onLostPointerCapture={pointerUp} aria-label="Lienzo de dibujo. Usa el mouse o un lápiz táctil para dibujar." />
-      {disabled && <div className="drawing-lock-label">Dibujo entregado</div>}
+      <canvas data-testid="drawing-canvas" ref={canvasRef} width={WIDTH} height={HEIGHT} className={locked ? 'drawing-locked' : tool === 'eraser' ? 'drawing-eraser' : ''} onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerUp} onPointerCancel={pointerUp} onLostPointerCapture={pointerUp} aria-label="Drawing canvas. Use a mouse or stylus to draw." />
+      {disabled && <div className="drawing-lock-label">Drawing submitted</div>}
     </div>
     <div className="drawing-footer">
-      <div className="drawing-actions" role="group" aria-label="Acciones del dibujo">
-        <button type="button" className="drawing-tool" aria-label="Deshacer" title="Deshacer (Ctrl + Z)" onClick={() => travel(-1)} disabled={locked || historyState.index <= 0}><Undo2 size={19} /></button>
-        <button type="button" className="drawing-tool" aria-label="Rehacer" title="Rehacer (Ctrl + Shift + Z)" onClick={() => travel(1)} disabled={locked || historyState.index >= historyState.length - 1}><Redo2 size={19} /></button>
+      <div className="drawing-actions" role="group" aria-label="Drawing actions">
+        <button type="button" className="drawing-tool" aria-label="Undo" title="Undo (Ctrl + Z)" onClick={() => travel(-1)} disabled={locked || historyState.index <= 0}><Undo2 size={19} /></button>
+        <button type="button" className="drawing-tool" aria-label="Redo" title="Redo (Ctrl + Shift + Z)" onClick={() => travel(1)} disabled={locked || historyState.index >= historyState.length - 1}><Redo2 size={19} /></button>
         <span className="drawing-action-divider" />
-        <button type="button" className="drawing-tool" aria-label="Borrar lienzo" title="Borrar lienzo" onClick={clear} disabled={locked}><Trash2 size={18} /></button>
-        <button type="button" className="drawing-tool" aria-label="Descargar dibujo" title="Descargar PNG" onClick={download} disabled={loading}><Download size={18} /></button>
+        <button type="button" className="drawing-tool" aria-label="Clear canvas" title="Clear canvas" onClick={clear} disabled={locked}><Trash2 size={18} /></button>
+        <button type="button" className="drawing-tool" aria-label="Download drawing" title="Download PNG" onClick={download} disabled={loading}><Download size={18} /></button>
       </div>
-      <span className="drawing-hint">No tiene que ser perfecto. Tiene que ser tuyo.</span>
-      <button type="button" className="drawing-submit" disabled={locked} onClick={submit}>Entregar dibujo <Send size={17} /></button>
+      <span className="drawing-hint">It does not have to be perfect. Make it yours.</span>
+      <button type="button" className="drawing-submit" disabled={locked} onClick={submit}>Submit drawing <Send size={17} /></button>
     </div>
     {notice && <p className="drawing-notice" role="status">{notice}</p>}
   </section>;

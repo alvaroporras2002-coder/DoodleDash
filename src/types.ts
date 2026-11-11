@@ -11,12 +11,12 @@ export type GameState = {
 };
 export const avatars = ['🍒','🍕','🥑','🍩','🌮','🍔','🍋','🥨','🍓','🍣','🧁','🥝'];
 export const modes: { id: Mode; name: string; tag: string; icon: string; description: string; color: string }[] = [
- {id:'classic',name:'Teléfono descompuesto',tag:'EL FAVORITO',icon:'☎',description:'Una frase, un dibujo y muchas interpretaciones inesperadas.',color:'peach'},
- {id:'speed',name:'Entrega exprés',tag:'MÁS RÁPIDO',icon:'⚡',description:'La misma cadena, con la mitad del tiempo. Confía en tu primer trazo.',color:'yellow'},
- {id:'masterpiece',name:'Obra maestra',tag:'SIN PRISA',icon:'✦',description:'El doble de tiempo para darle un poco más de arte al desastre.',color:'purple'},
- {id:'memory',name:'De memoria',tag:'A RECORDAR',icon:'◉',description:'Mira el dibujo unos segundos. Después, recréalo de memoria.',color:'mint'},
- {id:'animation',name:'En movimiento',tag:'FOTOGRAMA A FOTOGRAMA',icon:'▶',description:'Continúa el dibujo anterior y descubre la animación final.',color:'blue'},
- {id:'copy',name:'Copia creativa',tag:'DE MANO EN MANO',icon:'▧',description:'Reinterpreta cada dibujo. ¿Cuánto cambiará hasta el final?',color:'pink'},
- {id:'icebreaker',name:'Rompehielos',tag:'PARTIDA CORTA',icon:'☀',description:'Escribe una idea y dibuja la de un compañero. Dos rondas para conectar.',color:'yellow'},
+ {id:'classic',name:'Drawing Telephone',tag:'THE FAVORITE',icon:'☎',description:'One phrase, one drawing, and plenty of unexpected interpretations.',color:'peach'},
+ {id:'speed',name:'Express Delivery',tag:'FASTER',icon:'⚡',description:'The same chain, with half the time. Trust your first sketch.',color:'yellow'},
+ {id:'masterpiece',name:'Masterpiece',tag:'TAKE YOUR TIME',icon:'✦',description:'Double the time to turn your creative chaos into art.',color:'purple'},
+ {id:'memory',name:'From Memory',tag:'REMEMBER IT',icon:'◉',description:'Look at the drawing for a few seconds. Then recreate it from memory.',color:'mint'},
+ {id:'animation',name:'In Motion',tag:'FRAME BY FRAME',icon:'▶',description:'Build on the previous drawing and reveal the final animation.',color:'blue'},
+ {id:'copy',name:'Creative Copy',tag:'PASS IT ON',icon:'▧',description:'Reinterpret each drawing. How much will it change by the end?',color:'pink'},
+ {id:'icebreaker',name:'Icebreaker',tag:'QUICK GAME',icon:'☀',description:'Write an idea and draw a teammate’s prompt. Two rounds to connect.',color:'yellow'},
 ];
 export const defaultSettings: Settings = {mode:'classic',seconds:90,maxPlayers:20};
