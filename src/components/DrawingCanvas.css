@@ -1,9 +1,107 @@
-.drawing-editor{--drawing-accent:#7041d6;--drawing-ink:#30253e;--drawing-border:#f0eaf7;background:#fff;border:1px solid var(--drawing-border);border-radius:22px;overflow:hidden;color:var(--drawing-ink);box-shadow:0 5px 24px #30253e06}.drawing-toolbar{display:flex;align-items:center;gap:18px;padding:15px 18px;flex-wrap:wrap;background:#fff}.drawing-tools,.drawing-actions{display:flex;align-items:center;gap:5px}.drawing-tool{width:37px;height:37px;display:inline-flex;align-items:center;justify-content:center;border:0;background:transparent;color:#30253e;border-radius:10px;cursor:pointer;transition:background .16s,transform .16s,color .16s;padding:0}.drawing-tool:hover:not(:disabled){background:#f0eaf7;color:#7041d6}.drawing-tool.selected{background:#f7f4fc;color:var(--drawing-accent);box-shadow:inset 0 0 0 1px #f0eaf7}.drawing-tool:active:not(:disabled),.drawing-submit:active:not(:disabled){transform:scale(.96)}.drawing-tool:disabled,.drawing-submit:disabled{opacity:.38;cursor:not-allowed}.drawing-colors{display:flex;gap:6px;align-items:center;flex-wrap:wrap;max-width:350px}.drawing-swatch{width:23px;height:23px;border-radius:50%;border:1px solid #0002;cursor:pointer;position:relative;padding:0;box-shadow:0 0 0 2px #fff;transition:transform .16s}.drawing-swatch:hover:not(:disabled){transform:translateY(-2px)}.drawing-swatch.selected{outline:2px solid #30253e;outline-offset:2px}.drawing-swatch:disabled{cursor:not-allowed;opacity:.5}.drawing-custom-color{width:24px;height:24px;border-radius:50%;display:block;overflow:hidden;background:conic-gradient(red,#ff0,lime,cyan,blue,magenta,red);border:2px solid #fff;box-shadow:0 0 0 1px #ddd;cursor:pointer}.drawing-custom-color input{opacity:0;width:28px;height:28px;padding:0;cursor:pointer}.drawing-width{font-size:11px;color:#756580;display:flex;flex-direction:column;gap:4px;min-width:95px;margin-left:auto}.drawing-width span{display:flex;justify-content:space-between;gap:15px}.drawing-width strong{font-weight:650;color:#30253e}.drawing-width input{width:105px;accent-color:var(--drawing-accent);height:15px;margin:0}.drawing-paper{position:relative;background-color:#fff;background-size:100% 100%;border-top:1px solid var(--drawing-border);border-bottom:1px solid var(--drawing-border);line-height:0}.drawing-paper canvas{display:block;width:100%;height:auto;aspect-ratio:900/560;touch-action:none;cursor:crosshair;user-select:none;-webkit-user-select:none}.drawing-paper canvas.drawing-eraser{cursor:cell}.drawing-paper canvas.drawing-locked{cursor:default}.drawing-lock-label{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);background:#fff;border:1px solid var(--drawing-border);box-shadow:0 5px 20px #0001;border-radius:30px;padding:13px 22px;font-size:13px;line-height:1;color:#30253e;font-weight:650}.drawing-footer{display:flex;align-items:center;gap:14px;padding:14px 18px;background:#fff;flex-wrap:wrap}.drawing-action-divider{height:19px;width:1px;background:var(--drawing-border);margin:0 5px}.drawing-hint{color:#756580;font-size:11px;margin-left:auto}.drawing-submit{border:0;border-radius:12px;padding:13px 19px;display:inline-flex;align-items:center;justify-content:center;gap:10px;background:var(--drawing-accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:background .16s,transform .16s;white-space:nowrap}.drawing-submit:hover:not(:disabled){background:#5730ad}.drawing-notice{margin:0;padding:0 20px 14px;color:#30253e;font-size:12px}.drawing-editor button:focus-visible,.drawing-editor input:focus-visible{outline:3px solid #006bba;outline-offset:3px}@media(max-width:1000px){.drawing-hint{display:none}.drawing-submit{margin-left:auto}.drawing-toolbar{gap:14px}.drawing-colors{max-width:225px}.drawing-swatch{width:21px;height:21px}.drawing-width{min-width:80px}.drawing-width input{width:90px}}@media(max-width:600px){.drawing-toolbar{padding:12px;gap:12px}.drawing-tools{gap:3px}.drawing-colors{max-width:none;order:3;flex:1}.drawing-width{min-width:85px}.drawing-tool{width:33px;height:33px}.drawing-footer{padding:10px;gap:8px}.drawing-submit{font-size:12px;padding:12px 13px;gap:7px}.drawing-actions{gap:2px}.drawing-action-divider{margin:0 3px}.drawing-editor{border-radius:16px}}@media(prefers-reduced-motion:reduce){.drawing-editor *{transition:none!important}}
+.drawing-editor {
+  --drawing-accent: #ac8af7;
+  --drawing-ink: #e9e8ef;
+  --drawing-border: #41414c;
+  min-width: 0;
+  border: 1px solid var(--drawing-border);
+  border-radius: 12px;
+  background: #1e2025;
+  color: var(--drawing-ink);
+}
 
-.drawing-editor{--drawing-accent:#7041d6;--drawing-ink:#30253e;--drawing-border:#e1d5ed;box-shadow:0 8px 28px #30213f06;border-radius:17px}.drawing-toolbar,.drawing-footer{background:#f8f5fc}.drawing-tool{color:#746784}.drawing-tool:hover:not(:disabled){background:#e9def7;color:#7041d6}.drawing-tool.selected{background:#e5d7f6;color:#7041d6;box-shadow:inset 0 0 0 1px #c8ade6,0 0 0 2px #7041d61a}.drawing-width{color:#746784}.drawing-width strong{color:#30253e}.drawing-submit{background:#7041d6;border-radius:10px}.drawing-submit:hover:not(:disabled){background:#5730ad}.drawing-hint{color:#8a759b}.drawing-lock-label{border-color:#e1d5ed;color:#69408e}.drawing-notice{color:#74508f}.drawing-editor button:focus-visible,.drawing-editor input:focus-visible{outline-color:#7041d6}
+.drawing-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; padding: 13px 14px; background: #1e2025; border-radius: 11px 11px 0 0; }
+.drawing-tools, .drawing-actions { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.drawing-tools { flex-wrap: wrap; }
+.drawing-tool { display: inline-flex; align-items: center; justify-content: center; width: 38px; min-width: 38px; height: 40px; padding: 0; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #bab7c6; cursor: pointer; transition: background-color .16s, border-color .16s, color .16s; }
+.drawing-tool:hover:not(:disabled) { background: #30303a; color: #f1eef9; }
+.drawing-tool.selected { background: #372b4d; border-color: #aa8adf; color: #d7bcff; }
+.drawing-tool:disabled, .drawing-submit:disabled { opacity: .35; cursor: not-allowed; }
+.drawing-colors { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; min-width: 0; max-width: 350px; }
+.drawing-swatch { position: relative; width: 24px; height: 24px; padding: 0; border: 1px solid #ffffff59; border-radius: 50%; box-shadow: 0 0 0 2px #1e2025; cursor: pointer; }
+.drawing-swatch:hover:not(:disabled) { outline: 1px solid #b6b1c2; outline-offset: 3px; }
+.drawing-swatch.selected { outline: 2px solid #d7bcff; outline-offset: 3px; }
+.drawing-swatch:disabled { opacity: .5; cursor: not-allowed; }
+.drawing-custom-color { position: relative; display: block; width: 25px; height: 25px; min-width: 25px; min-height: 25px; margin: 0; padding: 0; overflow: hidden; border: 1px solid #d2c8e2; border-radius: 50%; background: conic-gradient(#f16882, #f3d37a, #a9df91, #7dc7db, #b18bef, #f16882); cursor: pointer; }
+.drawing-custom-color input { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; margin: 0; padding: 0; opacity: 0; cursor: pointer; }
+.drawing-custom-color:focus-within { outline: 3px solid var(--drawing-accent); outline-offset: 4px; }
+.drawing-width { display: flex; align-items: center; flex-direction: column; gap: 5px; min-width: 85px; margin: 0 0 0 auto; color: #b3aebe; font-size: 10px; font-weight: 400; }
+.drawing-width span { display: flex; width: 100%; justify-content: space-between; gap: 18px; }
+.drawing-width strong { color: #ded9e7; font-weight: 500; font-variant-numeric: tabular-nums; }
+.drawing-width input { display: block; width: 100px; height: 24px; min-height: 24px; margin: 0; padding: 0; border: 0; background: transparent; accent-color: var(--drawing-accent); cursor: pointer; }
 
-.drawing-tools,.drawing-colors{row-gap:8px}.drawing-tools .drawing-tool{width:40px;height:40px}.drawing-shortcuts{position:relative;margin-left:auto;font-size:11px;color:#806494}.drawing-shortcuts summary{cursor:pointer;min-height:30px;display:flex;align-items:center;list-style:none;padding:6px 9px;border:1px solid #dfd0eb;border-radius:8px;background:#fbf9ff}.drawing-shortcuts p{position:absolute;z-index:5;bottom:38px;right:0;min-width:250px;max-width:calc(100vw - 60px);margin:0;padding:13px;background:#fff;border:1px solid #dccce8;box-shadow:0 8px 24px #30213f16;border-radius:10px;font-size:11px;line-height:1.8;color:#746087}.drawing-width input{min-height:24px}.drawing-custom-color input{min-height:30px}.drawing-footer{gap:10px}
-@media(pointer:coarse){.drawing-tool{min-height:42px;min-width:42px}.drawing-swatch{width:29px;height:29px}.drawing-custom-color{width:29px;height:29px}.drawing-width input{min-height:34px}}
-@media(max-width:600px){.drawing-toolbar{gap:12px}.drawing-tools .drawing-tool{width:38px;height:40px}.drawing-tools{gap:4px}.drawing-colors{gap:8px;flex-wrap:wrap;max-width:100%;width:100%}.drawing-swatch{width:25px;height:25px}.drawing-width{margin-left:0;flex-direction:row;align-items:center;gap:12px}.drawing-width span{gap:12px}.drawing-width input{width:125px;min-height:26px}.drawing-footer .drawing-actions{flex:1;gap:3px}.drawing-shortcuts{order:3;flex-basis:100%;margin-left:0}.drawing-shortcuts summary{display:inline-flex;min-height:32px}.drawing-shortcuts p{left:0;right:auto;bottom:38px}.drawing-submit{min-height:42px}.drawing-footer{padding:12px;gap:10px}.drawing-tool{width:36px;height:38px}}
+.drawing-paper { position: relative; background-color: #fff; background-size: 100% 100%; border-top: 1px solid var(--drawing-border); border-bottom: 1px solid var(--drawing-border); line-height: 0; color-scheme: light; }
+.drawing-paper canvas { display: block; width: 100%; height: auto; aspect-ratio: 900 / 560; touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none; }
+.drawing-paper canvas.drawing-eraser { cursor: cell; }
+.drawing-paper canvas.drawing-locked { cursor: default; }
+.drawing-lock-label { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); max-width: calc(100% - 24px); padding: 10px 16px; border: 1px solid #484150; border-radius: 8px; color: #ede6f6; background: #24202eea; font-size: 12px; font-weight: 500; text-align: center; line-height: 1.5; }
 
-.drawing-tools{flex-wrap:wrap;max-width:100%}
+.drawing-footer { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 13px 14px; background: #1e2025; border-radius: 0 0 11px 11px; }
+.drawing-action-divider { width: 1px; height: 18px; margin: 0 4px; background: var(--drawing-border); }
+.drawing-hint { margin-left: auto; color: #aaa4b7; font-size: 10px; }
+.drawing-shortcuts { position: relative; margin-left: auto; color: #b5aebe; font-size: 10px; }
+.drawing-shortcuts summary { display: inline-flex; align-items: center; min-height: 36px; padding: 7px 9px; border: 1px solid #45404e; border-radius: 7px; background: #26232d; list-style: none; cursor: pointer; }
+.drawing-shortcuts summary::-webkit-details-marker { display: none; }
+.drawing-shortcuts summary:hover { background: #332a40; color: #e2d1fa; }
+.drawing-shortcuts p { position: absolute; z-index: 5; right: 0; bottom: 44px; width: 270px; max-width: calc(100vw - 52px); margin: 0; padding: 14px; border: 1px solid #62516e; border-radius: 9px; background: #28222f; color: #ddd0eb; box-shadow: 0 12px 32px #0005; font-size: 11px; line-height: 1.9; }
+.drawing-submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 11px 16px; border: 1px solid var(--drawing-accent); border-radius: 8px; background: var(--drawing-accent); color: #191322; cursor: pointer; font-size: 12px; font-weight: 550; line-height: 1.5; }
+.drawing-submit:hover:not(:disabled) { background: #bb9cff; border-color: #bb9cff; }
+.drawing-notice { margin: 0; padding: 0 16px 15px; border-radius: 0 0 11px 11px; background: #1e2025; color: #d1c2e1; font-size: 11px; line-height: 1.7; }
+.drawing-editor button:focus-visible, .drawing-editor input:focus-visible, .drawing-editor summary:focus-visible { outline: 3px solid var(--drawing-accent); outline-offset: 4px; }
+
+@media (max-width: 1400px) and (min-width: 801px) {
+  .room-main .drawing-toolbar { gap: 12px; }
+  .room-main .drawing-colors { order: 3; max-width: 100%; width: 100%; padding-bottom: 3px; }
+  .room-main .drawing-width { margin-left: auto; }
+  .room-main .drawing-shortcuts { order: 3; width: 100%; margin-left: 0; }
+  .room-main .drawing-shortcuts p { left: 0; right: auto; }
+  .room-main .drawing-submit { margin-left: auto; }
+}
+
+@media (max-width: 650px) {
+  .drawing-toolbar { gap: 12px; padding: 11px; }
+  .drawing-colors { order: 0; width: 100%; max-width: none; gap: 9px; padding-block: 3px; }
+  .drawing-tools { gap: 3px; }
+  .drawing-tool { width: 37px; min-width: 37px; height: 40px; }
+  .drawing-width { flex-direction: row; gap: 10px; margin-left: 0; width: 100%; }
+  .drawing-width span { width: auto; gap: 12px; }
+  .drawing-width input { width: 150px; }
+  .drawing-footer { padding: 11px; gap: 10px; }
+  .drawing-shortcuts { order: 3; margin-left: 0; width: 100%; }
+  .drawing-shortcuts p { left: 0; right: auto; }
+  .drawing-submit { margin-left: auto; padding: 10px 12px; font-size: 11px; gap: 7px; }
+  .drawing-actions { gap: 2px; }
+  .drawing-action-divider { margin-inline: 3px; }
+  .drawing-footer .drawing-tool { width: 32px; min-width: 32px; }
+}
+
+@media (max-width: 400px) {
+  .drawing-toolbar { gap: 11px; }
+  .drawing-tools { gap: 4px; }
+  .drawing-tool { width: 36px; min-width: 36px; }
+  .drawing-colors { gap: 10px; }
+  .drawing-swatch { width: 23px; height: 23px; }
+  .drawing-footer .drawing-actions { width: 100%; }
+  .drawing-footer .drawing-tool { width: 40px; min-width: 40px; }
+  .drawing-submit { width: 100%; min-height: 44px; margin: 0; }
+  .drawing-shortcuts { text-align: center; }
+  .drawing-shortcuts p { text-align: left; }
+  .drawing-lock-label { font-size: 11px; padding: 8px 12px; }
+}
+
+@media (pointer: coarse) {
+  .drawing-tool { min-width: 42px; min-height: 44px; }
+  .drawing-swatch { width: 29px; height: 29px; }
+  .drawing-custom-color { width: 29px; min-width: 29px; height: 29px; }
+  .drawing-width input { min-height: 34px; }
+  .drawing-shortcuts summary { min-height: 40px; }
+  .drawing-submit { min-height: 44px; }
+}
+
+@media (max-width: 360px) {
+  .drawing-tools { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; gap: 5px; }
+  .drawing-tools .drawing-tool { width: 100%; min-width: 0; min-height: 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawing-editor *, .drawing-editor *::before, .drawing-editor *::after { animation: none !important; transition: none !important; }
+}

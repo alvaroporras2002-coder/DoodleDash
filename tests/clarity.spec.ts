@@ -8,6 +8,7 @@ test('room clarity explains ready blockers and updates submission progress',asyn
  await expect(page.getByRole('progressbar',{name:'Players ready'})).toHaveAttribute('aria-valuenow','2');
  await page.getByRole('button',{name:'Start game',exact:true}).click();
  await expect(page.getByText('Game started',{exact:true})).toBeVisible();
+ await page.getByText('Quick tip',{exact:true}).click();
  await expect(page.getByText('The reference disappears after 7 seconds. Recreate what you remember.')).toBeVisible();
  await expect(page.getByRole('progressbar',{name:'Players finished'})).toHaveAttribute('aria-valuenow','1');
  await page.getByRole('button',{name:'Teammate finished',exact:true}).click();
@@ -19,7 +20,7 @@ test('room clarity preserves reveal secrecy and offers replay modes',async({page
  await page.getByRole('button',{name:'Reveal next',exact:true}).click();
  await expect(page.getByText('A secret silly interpretation',{exact:true})).toBeVisible();
  await page.getByRole('button',{name:'Finish reveal',exact:true}).click();
- await expect(page.getByText('Same room. Another great story.').first()).toBeVisible();
+ await expect(page.getByRole('heading',{name:'Next game',exact:true}).first()).toBeVisible();
  const replay=page.locator('.replay-menu').last();
  await replay.getByRole('button',{name:'Try another mode',exact:true}).click();
  await replay.getByRole('combobox',{name:'Next game mode'}).selectOption('memory');

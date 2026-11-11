@@ -11,12 +11,12 @@ export type GameState = {
 };
 export const avatars = ['🎨','🪴','🌙','✏️','🦋','🪻','🌿','🪐','🖌️','☁️','⭐','🍄'];
 export const modes: { id: Mode; name: string; tag: string; icon: string; description: string; color: string }[] = [
- {id:'classic',name:'Drawing Telephone',tag:'THE ORIGINAL',icon:'〰',description:'One phrase, one drawing, and plenty of unexpected interpretations.',color:'peach'},
- {id:'speed',name:'Quick Sketch',tag:'FASTER',icon:'⚡',description:'The same chain, with half the time. Trust your first sketch.',color:'yellow'},
- {id:'masterpiece',name:'Masterpiece',tag:'TAKE YOUR TIME',icon:'✦',description:'Double the time to turn your creative chaos into art.',color:'purple'},
- {id:'memory',name:'From Memory',tag:'REMEMBER IT',icon:'◉',description:'Look at the drawing for a few seconds. Then recreate it from memory.',color:'mint'},
- {id:'animation',name:'In Motion',tag:'FRAME BY FRAME',icon:'▶',description:'Build on the previous drawing and reveal the final animation.',color:'blue'},
- {id:'copy',name:'Creative Copy',tag:'PASS IT ON',icon:'▧',description:'Reinterpret each drawing. How much will it change by the end?',color:'pink'},
- {id:'icebreaker',name:'Icebreaker',tag:'QUICK GAME',icon:'☀',description:'Write an idea and draw a teammate’s prompt. Two rounds to connect.',color:'yellow'},
+ {id:'classic',name:'Drawing Telephone',tag:'THE ORIGINAL',icon:'〰',description:'Alternate phrases and drawings.',color:'peach'},
+ {id:'speed',name:'Quick Sketch',tag:'FASTER',icon:'⚡',description:'The classic chain, with half the time.',color:'yellow'},
+ {id:'masterpiece',name:'Masterpiece',tag:'TAKE YOUR TIME',icon:'✦',description:'Double the drawing time.',color:'purple'},
+ {id:'memory',name:'From Memory',tag:'REMEMBER IT',icon:'◉',description:'Recreate a drawing after a seven-second look.',color:'mint'},
+ {id:'animation',name:'In Motion',tag:'FRAME BY FRAME',icon:'▶',description:'Add frames to a shared animation.',color:'blue'},
+ {id:'copy',name:'Creative Copy',tag:'PASS IT ON',icon:'▧',description:'Redraw each reference in your own style.',color:'pink'},
+ {id:'icebreaker',name:'Icebreaker',tag:'QUICK GAME',icon:'☀',description:'One phrase, one drawing. Two quick rounds.',color:'yellow'},
 ];
 export const defaultSettings: Settings = {mode:'classic',seconds:90,maxPlayers:20};
