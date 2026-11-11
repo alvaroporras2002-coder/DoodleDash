@@ -55,7 +55,11 @@ jobs:
         run: npm test -- --grep 'room clarity'
       - name: Test DoodleOnline identity and responsive layouts
         if: always() && !cancelled()
-        run: npm test -- --grep 'DoodleOnline'
+        id: brand
+        run: node scripts/test-ci.mjs 'DoodleOnline'
+      - name: ${{ steps.brand.outputs.summary || 'Brand result' }}
+        if: always() && !cancelled()
+        run: echo 'Brand result recorded above'
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
