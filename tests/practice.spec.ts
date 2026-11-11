@@ -29,7 +29,7 @@ test('practice completes a real drawing chain and exports its history',async({pa
 });
 test('Guest entry requires a nickname and never simulates a session without configuration',async({page})=>{
  await page.goto('/?room=ABC123');
- const enter=page.getByRole('button',{name:'Join with my nickname'});
+ const enter=page.getByRole('button',{name:'Join room',exact:true});
  await expect(enter).toBeDisabled();
  await page.getByRole('textbox',{name:'Your nickname'}).fill('Alvaro');
  await enter.click();

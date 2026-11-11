@@ -50,6 +50,9 @@ jobs:
       - name: Test mobile layout and instructions
         if: always() && !cancelled()
         run: npm test -- --grep 'small screen'
+      - name: Test room clarity and replay
+        if: always() && !cancelled()
+        run: npm test -- --grep 'room clarity'
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
