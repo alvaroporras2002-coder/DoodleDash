@@ -48,3 +48,28 @@ test('leave can only remove the authenticated identity even when a caller suppli
 test('upstream outages return a safe error without secrets',async()=>{
  const response=await handleVideo(req(),env,async()=>{throw new Error(env.LIVEKIT_API_SECRET)});assert.equal(response.status,502);assert.ok(!(await response.text()).includes(env.LIVEKIT_API_SECRET));
 });
+
+import {syncCallSubscriptions} from '../../src/callSubscriptions.ts';
+test('optional call subscribes late microphone and keeps voices when cameras are hidden',()=>{
+ const calls=[];const p={identity:'partner',trackPublications:new Map()};
+ syncCallSubscriptions([p],new Set());
+ const mic={source:'microphone',isDesired:false,setSubscribed(value){this.isDesired=value;calls.push(['mic',value]);}};
+ p.trackPublications.set('mic',mic);
+ syncCallSubscriptions([p],new Set());
+ assert.deepEqual(calls,[['mic',true]]);
+ syncCallSubscriptions([p],new Set());
+ assert.equal(calls.length,1);
+ p.trackPublications.set('cam',{source:'camera',isDesired:true,setSubscribed(value){this.isDesired=value;calls.push(['camera',value]);}});
+ syncCallSubscriptions([p],new Set());
+ assert.equal(mic.isDesired,true);
+ assert.deepEqual(calls.at(-1),['camera',false]);
+ syncCallSubscriptions([p],new Set(['partner']));
+ assert.deepEqual(calls.at(-1),['camera',true]);
+});
+test('optional call restores microphone subscription intent on reconnect',()=>{
+ const mic={source:'microphone',isDesired:false,setSubscribed(value){this.isDesired=value;}};
+ const p={identity:'reconnected',trackPublications:new Map([['mic',mic]])};
+ syncCallSubscriptions([p],new Set());assert.equal(mic.isDesired,true);
+ mic.isDesired=false;
+ syncCallSubscriptions([p],new Set());assert.equal(mic.isDesired,true);
+});
