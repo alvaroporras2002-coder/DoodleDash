@@ -5,6 +5,7 @@ create role authenticated nologin;
 create schema auth;
 create table auth.users (
   id uuid primary key,
+  is_anonymous boolean not null default false,
   email text,
   email_confirmed_at timestamptz,
   raw_app_meta_data jsonb not null default '{}',

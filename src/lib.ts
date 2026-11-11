@@ -9,7 +9,7 @@ export async function rpc<T>(fn:string,args:Record<string,unknown>): Promise<T> 
  if(error) throw new Error(error.message);
  return data as T;
 }
-export function normalizeCode(value:string) { return value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8); }
+export function normalizeCode(value:string) { return value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12); }
 export function secondsLeft(deadline:string|null, serverOffset:number, now=Date.now()) {return deadline ? Math.max(0, Math.ceil((Date.parse(deadline)-now-serverOffset)/1000)):0;}
 export function downloadJson(filename:string,value:unknown) {
  const href=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'}));

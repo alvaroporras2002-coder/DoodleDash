@@ -23,9 +23,9 @@ jobs:
       - name: ${{ steps.drawing.outputs.summary || 'Drawing flow result' }}
         if: always() && !cancelled()
         run: echo 'Drawing result recorded above'
-      - name: Test unconfigured Google access
+      - name: Test guest access
         if: always() && !cancelled()
-        run: npm test -- --grep 'Google login'
+        run: npm test -- --grep 'Guest entry'
       - name: Test mobile layout and instructions
         if: always() && !cancelled()
         run: npm test -- --grep 'small screen'
@@ -59,3 +59,5 @@ jobs:
       - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/bootstrap.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611110001_game.sql
       - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/game.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/202611110002_guest_access.sql
+      - run: psql -v ON_ERROR_STOP=1 -f supabase/tests/guests.sql

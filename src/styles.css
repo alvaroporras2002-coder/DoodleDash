@@ -6,3 +6,5 @@
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 /* Decorative orbits stay inside the illustration on narrow screens. */
 @media(max-width:760px){.doodle-art{contain:paint}}
+
+.guest-entry{max-width:370px}.guest-entry>label{margin-top:16px}.guest-entry>.primary{margin-top:18px}.guest-entry .avatar-picker{gap:6px}.guest-entry .login-caption{margin-left:0}
