@@ -27,12 +27,16 @@ test('practice completes a real drawing chain and exports its history',async({pa
  await page.getByRole('button',{name:'Guardar historia'}).click();
  expect((await download).suggestedFilename()).toBe('doodledash-practica.json');
 });
-test('Google login never pretends to succeed before configuration',async({page})=>{
+test('Guest entry requires a nickname and never simulates a session without configuration',async({page})=>{
  await page.goto('/?room=ABC123');
- await page.getByRole('button',{name:'Continuar con Google'}).click();
- await expect(page.getByRole('status')).toContainText('conectar Supabase');
+ const enter=page.getByRole('button',{name:'Entrar con mi apodo'});
+ await expect(enter).toBeDisabled();
+ await page.getByRole('textbox',{name:'Tu apodo'}).fill('Alvaro');
+ await enter.click();
+ await expect(page.getByRole('status')).toContainText('Conecta Supabase');
  await expect(page.getByText('Te invitaron a la sala')).toBeVisible();
  await expect(page.getByRole('button',{name:'Crear sala privada'})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Continuar con Google'})).toHaveCount(0);
 });
 test('small screen has no horizontal overflow and instructions close',async({page})=>{
  await page.setViewportSize({width:390,height:844});
