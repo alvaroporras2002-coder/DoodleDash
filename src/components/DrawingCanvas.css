@@ -1,88 +1,92 @@
 .drawing-editor {
-  --drawing-accent: #ac8af7;
-  --drawing-ink: #e9e8ef;
-  --drawing-border: #41414c;
+  --drawing-accent: var(--accent, #a780f5);
+  --drawing-ink: var(--text, #f1f2f5);
+  --drawing-muted: var(--muted, #a5a7b2);
+  --drawing-border: var(--line, #34363f);
+  --drawing-controls: var(--surface-raised, #24262c);
+  display: flex;
+  flex-direction: column;
   min-width: 0;
-  border: 1px solid var(--drawing-border);
-  border-radius: 12px;
-  background: #1e2025;
   color: var(--drawing-ink);
 }
 
-.drawing-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; padding: 13px 14px; background: #1e2025; border-radius: 11px 11px 0 0; }
-.drawing-tools, .drawing-actions { display: flex; align-items: center; gap: 4px; min-width: 0; }
-.drawing-tools { flex-wrap: wrap; }
-.drawing-tool { display: inline-flex; align-items: center; justify-content: center; width: 38px; min-width: 38px; height: 40px; padding: 0; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #bab7c6; cursor: pointer; transition: background-color .16s, border-color .16s, color .16s; }
-.drawing-tool:hover:not(:disabled) { background: #30303a; color: #f1eef9; }
-.drawing-tool.selected { background: #372b4d; border-color: #aa8adf; color: #d7bcff; }
-.drawing-tool:disabled, .drawing-submit:disabled { opacity: .35; cursor: not-allowed; }
-.drawing-colors { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; min-width: 0; max-width: 350px; }
-.drawing-swatch { position: relative; width: 24px; height: 24px; padding: 0; border: 1px solid #ffffff59; border-radius: 50%; box-shadow: 0 0 0 2px #1e2025; cursor: pointer; }
-.drawing-swatch:hover:not(:disabled) { outline: 1px solid #b6b1c2; outline-offset: 3px; }
-.drawing-swatch.selected { outline: 2px solid #d7bcff; outline-offset: 3px; }
-.drawing-swatch:disabled { opacity: .5; cursor: not-allowed; }
-.drawing-custom-color { position: relative; display: block; width: 25px; height: 25px; min-width: 25px; min-height: 25px; margin: 0; padding: 0; overflow: hidden; border: 1px solid #d2c8e2; border-radius: 50%; background: conic-gradient(#f16882, #f3d37a, #a9df91, #7dc7db, #b18bef, #f16882); cursor: pointer; }
-.drawing-custom-color input { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; margin: 0; padding: 0; opacity: 0; cursor: pointer; }
-.drawing-custom-color:focus-within { outline: 3px solid var(--drawing-accent); outline-offset: 4px; }
-.drawing-width { display: flex; align-items: center; flex-direction: column; gap: 5px; min-width: 85px; margin: 0 0 0 auto; color: #b3aebe; font-size: 10px; font-weight: 400; }
-.drawing-width span { display: flex; width: 100%; justify-content: space-between; gap: 18px; }
-.drawing-width strong { color: #ded9e7; font-weight: 500; font-variant-numeric: tabular-nums; }
-.drawing-width input { display: block; width: 100px; height: 24px; min-height: 24px; margin: 0; padding: 0; border: 0; background: transparent; accent-color: var(--drawing-accent); cursor: pointer; }
-
-.drawing-paper { position: relative; background-color: #fff; background-size: 100% 100%; border-top: 1px solid var(--drawing-border); border-bottom: 1px solid var(--drawing-border); line-height: 0; color-scheme: light; }
+/* The paper comes first in the DOM; every tool lives underneath the drawing. */
+.drawing-paper { position: relative; overflow: hidden; margin-bottom: 8px; border: 1px solid #ffffff24; border-radius: 8px; background-color: #fff; background-size: 100% 100%; line-height: 0; color-scheme: light; }
 .drawing-paper canvas { display: block; width: 100%; height: auto; aspect-ratio: 900 / 560; touch-action: none; cursor: crosshair; user-select: none; -webkit-user-select: none; }
 .drawing-paper canvas.drawing-eraser { cursor: cell; }
 .drawing-paper canvas.drawing-locked { cursor: default; }
-.drawing-lock-label { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); max-width: calc(100% - 24px); padding: 10px 16px; border: 1px solid #484150; border-radius: 8px; color: #ede6f6; background: #24202eea; font-size: 12px; font-weight: 500; text-align: center; line-height: 1.5; }
+.drawing-lock-label { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); max-width: calc(100% - 24px); padding: 10px 16px; border: 1px solid var(--drawing-border); border-radius: 7px; color: var(--drawing-ink); background: #1c1e22f2; font-size: 12px; font-weight: 500; text-align: center; line-height: 1.5; }
 
-.drawing-footer { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 13px 14px; background: #1e2025; border-radius: 0 0 11px 11px; }
-.drawing-action-divider { width: 1px; height: 18px; margin: 0 4px; background: var(--drawing-border); }
-.drawing-hint { margin-left: auto; color: #aaa4b7; font-size: 10px; }
-.drawing-shortcuts { position: relative; margin-left: auto; color: #b5aebe; font-size: 10px; }
-.drawing-shortcuts summary { display: inline-flex; align-items: center; min-height: 36px; padding: 7px 9px; border: 1px solid #45404e; border-radius: 7px; background: #26232d; list-style: none; cursor: pointer; }
+.drawing-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 14px; min-width: 0; padding: 10px 12px; border: 1px solid var(--drawing-border); border-bottom: 0; border-radius: 8px 8px 0 0; background: var(--drawing-controls); }
+.drawing-tools, .drawing-actions { display: flex; align-items: center; gap: 3px; min-width: 0; }
+.drawing-tools { flex-wrap: wrap; }
+.drawing-tool { display: inline-flex; align-items: center; justify-content: center; width: 34px; min-width: 34px; height: 36px; padding: 0; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--drawing-muted); cursor: pointer; transition: background-color .16s, border-color .16s, color .16s; }
+.drawing-tool svg { width: 17px; height: 17px; }
+.drawing-tool:hover:not(:disabled) { background: var(--surface-hover, #2b2d35); color: var(--drawing-ink); }
+.drawing-tool.selected { background: var(--drawing-accent); border-color: var(--drawing-accent); color: #191322; }
+.drawing-tool.selected:hover:not(:disabled) { background: #b894ff; color: #191322; }
+.drawing-tool:disabled, .drawing-submit:disabled { opacity: .35; cursor: not-allowed; }
+
+.drawing-colors { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; min-width: 0; max-width: 320px; padding: 3px; }
+.drawing-swatch { position: relative; width: 20px; height: 20px; padding: 0; border: 1px solid #ffffff59; border-radius: 50%; cursor: pointer; }
+.drawing-swatch:hover:not(:disabled) { outline: 1px solid var(--drawing-muted); outline-offset: 3px; }
+.drawing-swatch.selected { outline: 2px solid var(--drawing-ink); outline-offset: 3px; }
+.drawing-swatch:disabled { opacity: .5; cursor: not-allowed; }
+.drawing-custom-color { position: relative; display: block; width: 21px; height: 21px; min-width: 21px; min-height: 21px; margin: 0; padding: 0; overflow: hidden; border: 1px solid var(--drawing-muted); border-radius: 50%; background: var(--drawing-accent); cursor: pointer; }
+.drawing-custom-color input { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; margin: 0; padding: 0; opacity: 0; cursor: pointer; }
+.drawing-custom-color:focus-within { outline: 3px solid var(--drawing-accent); outline-offset: 4px; }
+.drawing-width { display: flex; align-items: center; flex-direction: column; gap: 3px; min-width: 82px; margin: 0 0 0 auto; color: var(--drawing-muted); font-size: 10px; font-weight: 400; }
+.drawing-width span { display: flex; width: 100%; justify-content: space-between; gap: 16px; }
+.drawing-width strong { color: var(--drawing-ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+.drawing-width input { display: block; width: 88px; height: 22px; min-height: 22px; margin: 0; padding: 0; border: 0; background: transparent; accent-color: var(--drawing-accent); cursor: pointer; }
+
+.drawing-footer { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; min-width: 0; padding: 8px 12px 10px; border: 1px solid var(--drawing-border); border-top-color: #ffffff0b; border-radius: 0 0 8px 8px; background: var(--drawing-controls); }
+.drawing-action-divider { width: 1px; height: 16px; margin: 0 6px; background: var(--drawing-border); }
+.drawing-hint { margin-left: auto; color: var(--drawing-muted); font-size: 10px; }
+.drawing-shortcuts { position: relative; margin-left: auto; color: var(--drawing-muted); font-size: 11px; }
+.drawing-shortcuts summary { display: inline-flex; align-items: center; min-height: 36px; padding: 7px 9px; border: 1px solid transparent; border-radius: 6px; background: transparent; list-style: none; cursor: pointer; }
 .drawing-shortcuts summary::-webkit-details-marker { display: none; }
-.drawing-shortcuts summary:hover { background: #332a40; color: #e2d1fa; }
-.drawing-shortcuts p { position: absolute; z-index: 5; right: 0; bottom: 44px; width: 270px; max-width: calc(100vw - 52px); margin: 0; padding: 14px; border: 1px solid #62516e; border-radius: 9px; background: #28222f; color: #ddd0eb; box-shadow: 0 12px 32px #0005; font-size: 11px; line-height: 1.9; }
-.drawing-submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 11px 16px; border: 1px solid var(--drawing-accent); border-radius: 8px; background: var(--drawing-accent); color: #191322; cursor: pointer; font-size: 12px; font-weight: 550; line-height: 1.5; }
-.drawing-submit:hover:not(:disabled) { background: #bb9cff; border-color: #bb9cff; }
-.drawing-notice { margin: 0; padding: 0 16px 15px; border-radius: 0 0 11px 11px; background: #1e2025; color: #d1c2e1; font-size: 11px; line-height: 1.7; }
+.drawing-shortcuts summary:hover { background: var(--surface-hover, #2b2d35); color: var(--drawing-ink); }
+.drawing-shortcuts[open] summary { color: var(--drawing-accent); }
+.drawing-shortcuts p { position: absolute; z-index: 5; right: 0; bottom: 44px; width: 270px; max-width: calc(100vw - 52px); margin: 0; padding: 14px; border: 1px solid var(--drawing-border); border-radius: 8px; background: var(--surface, #1c1e22); color: var(--drawing-ink); box-shadow: 0 12px 32px #0004; font-size: 11px; line-height: 1.9; }
+.drawing-submit { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 38px; padding: 9px 14px; border: 1px solid var(--drawing-accent); border-radius: 7px; background: var(--drawing-accent); color: #191322; cursor: pointer; font-size: 12px; font-weight: 600; line-height: 1.5; }
+.drawing-submit:hover:not(:disabled) { background: #b894ff; border-color: #b894ff; }
+.drawing-notice { margin: 8px 0 0; padding: 10px 12px; border: 1px solid var(--drawing-border); border-radius: 7px; background: var(--surface, #1c1e22); color: var(--drawing-ink); font-size: 11px; line-height: 1.7; }
 .drawing-editor button:focus-visible, .drawing-editor input:focus-visible, .drawing-editor summary:focus-visible { outline: 3px solid var(--drawing-accent); outline-offset: 4px; }
 
-@media (max-width: 1400px) and (min-width: 801px) {
-  .room-main .drawing-toolbar { gap: 12px; }
-  .room-main .drawing-colors { order: 3; max-width: 100%; width: 100%; padding-bottom: 3px; }
+/* Groups wrap independently as the real game canvas narrows. */
+@media (max-width: 1200px) and (min-width: 801px) {
+  .room-main .drawing-toolbar { gap: 9px 12px; }
+  .room-main .drawing-colors { order: 3; max-width: none; width: 100%; }
   .room-main .drawing-width { margin-left: auto; }
-  .room-main .drawing-shortcuts { order: 3; width: 100%; margin-left: 0; }
-  .room-main .drawing-shortcuts p { left: 0; right: auto; }
+  .room-main .drawing-shortcuts { margin-left: auto; }
   .room-main .drawing-submit { margin-left: auto; }
 }
 
 @media (max-width: 650px) {
-  .drawing-toolbar { gap: 12px; padding: 11px; }
-  .drawing-colors { order: 0; width: 100%; max-width: none; gap: 9px; padding-block: 3px; }
+  .drawing-toolbar { gap: 10px; padding: 10px; }
   .drawing-tools { gap: 3px; }
-  .drawing-tool { width: 37px; min-width: 37px; height: 40px; }
-  .drawing-width { flex-direction: row; gap: 10px; margin-left: 0; width: 100%; }
+  .drawing-tool { width: 38px; min-width: 38px; height: 42px; }
+  .drawing-colors { width: 100%; max-width: none; gap: 10px; padding: 4px; }
+  .drawing-swatch { width: 24px; height: 24px; }
+  .drawing-custom-color { width: 25px; min-width: 25px; height: 25px; }
+  .drawing-width { flex-direction: row; gap: 12px; margin-left: 0; width: 100%; }
   .drawing-width span { width: auto; gap: 12px; }
-  .drawing-width input { width: 150px; }
-  .drawing-footer { padding: 11px; gap: 10px; }
-  .drawing-shortcuts { order: 3; margin-left: 0; width: 100%; }
-  .drawing-shortcuts p { left: 0; right: auto; }
-  .drawing-submit { margin-left: auto; padding: 10px 12px; font-size: 11px; gap: 7px; }
+  .drawing-width input { width: 140px; min-width: 0; }
+  .drawing-footer { padding: 8px 10px 10px; gap: 8px; }
   .drawing-actions { gap: 2px; }
-  .drawing-action-divider { margin-inline: 3px; }
-  .drawing-footer .drawing-tool { width: 32px; min-width: 32px; }
+  .drawing-action-divider { margin-inline: 2px; }
+  .drawing-footer .drawing-tool { width: 36px; min-width: 36px; }
+  .drawing-shortcuts { order: 3; width: 100%; margin-left: 0; }
+  .drawing-shortcuts summary { min-height: 40px; padding-inline: 4px; }
+  .drawing-shortcuts p { left: 0; right: auto; }
+  .drawing-submit { margin-left: auto; min-height: 44px; padding: 10px 12px; font-size: 11px; gap: 7px; }
 }
 
 @media (max-width: 400px) {
-  .drawing-toolbar { gap: 11px; }
-  .drawing-tools { gap: 4px; }
-  .drawing-tool { width: 36px; min-width: 36px; }
-  .drawing-colors { gap: 10px; }
-  .drawing-swatch { width: 23px; height: 23px; }
   .drawing-footer .drawing-actions { width: 100%; }
-  .drawing-footer .drawing-tool { width: 40px; min-width: 40px; }
-  .drawing-submit { width: 100%; min-height: 44px; margin: 0; }
+  .drawing-footer .drawing-tool { width: 42px; min-width: 42px; }
+  .drawing-submit { width: 100%; margin: 0; }
   .drawing-shortcuts { text-align: center; }
   .drawing-shortcuts p { text-align: left; }
   .drawing-lock-label { font-size: 11px; padding: 8px 12px; }
@@ -90,10 +94,10 @@
 
 @media (pointer: coarse) {
   .drawing-tool { min-width: 42px; min-height: 44px; }
-  .drawing-swatch { width: 29px; height: 29px; }
-  .drawing-custom-color { width: 29px; min-width: 29px; height: 29px; }
+  .drawing-swatch { width: 30px; height: 30px; }
+  .drawing-custom-color { width: 30px; min-width: 30px; height: 30px; }
   .drawing-width input { min-height: 34px; }
-  .drawing-shortcuts summary { min-height: 40px; }
+  .drawing-shortcuts summary { min-height: 44px; }
   .drawing-submit { min-height: 44px; }
 }
 

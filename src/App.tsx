@@ -1,6 +1,6 @@
 import {lazy,Suspense,useEffect,useRef,useState} from 'react';
 import type {Session} from '@supabase/supabase-js';
-import {ArrowRight,Check,ChevronDown,HelpCircle,Loader2,LogOut,Plus,Users,X} from 'lucide-react';
+import {ArrowRight,Check,ChevronDown,HelpCircle,Loader2,LogOut,X} from 'lucide-react';
 import {Brand} from './components/Brand';
 import {HowTo} from './components/HowTo';
 import {AvatarPicker} from './components/AvatarPicker';
@@ -72,8 +72,8 @@ export default function App(){
  {!online&&<div className="offline-banner" role="status">You are offline. Reconnect to sync your work and continue with the team.</div>}
  <Suspense fallback={<main className="loading-page" role="status"><Loader2 className="spin"/><p>Opening room…</p></main>}>
  {loading?<main className="loading-page" role="status"><Loader2 className="spin"/><p>Loading…</p></main>:practice?<Practice exit={()=>setPractice(false)}/>:room&&session?<GameRoom code={room} userId={session.user.id} exit={leave}/>:<main className="home-page page-width">
-  <section className="home-intro"><span className="home-stroke" aria-hidden="true"/><h1>Draw. Guess.<br/><span>Repeat.</span></h1><p>A drawing game for 2–20 people.</p></section>
-  <div className="home-actions" aria-label="Start playing"><button className={entry==='create'?'primary selected':'primary'} aria-pressed={entry==='create'} disabled={busy} onClick={()=>choose('create')}><Plus size={19}/>Create room</button><button className={entry==='join'?'secondary selected':'secondary'} aria-pressed={entry==='join'} disabled={busy} onClick={()=>choose('join')}><Users size={19}/>Join room</button></div>
+  <section className="home-intro"><h1>Draw. Guess.<br/><span>Repeat.</span></h1><p>A drawing game for 2–20 people.</p></section>
+  <div className="home-actions" aria-label="Start playing"><button className={entry==='create'?'primary selected':'primary'} aria-pressed={entry==='create'} disabled={busy} onClick={()=>choose('create')}>Create room</button><button className={entry==='join'?'secondary selected':'secondary'} aria-pressed={entry==='join'} disabled={busy} onClick={()=>choose('join')}>Join room</button></div>
   {entry&&<section className="entry-panel" aria-label={entry==='create'?'Create a room':'Join a room'}><div className="entry-title"><h2>{entry==='create'?'Create a room':'Join a room'}</h2><button className="icon-button" aria-label="Close room form" disabled={busy} onClick={()=>{setEntry(null);setError('');setNotice('')}}><X size={17}/></button></div>
    <form className="entry-form" onSubmit={e=>{e.preventDefault();void enter()}}>
     {entry==='join'&&<><label htmlFor="room-code">Room code</label><input ref={roomInput} id="room-code" value={joinCode} placeholder="Paste a room code" maxLength={12} autoComplete="off" spellCheck={false} disabled={busy} onChange={e=>setJoinCode(normalizeCode(e.target.value))}/></>}
@@ -84,7 +84,7 @@ export default function App(){
   </section>}
   {error&&<div className="alert" role="alert">{error}<button className="icon-button" aria-label="Dismiss error" onClick={()=>setError('')}><X size={16}/></button></div>}
   {notice&&<div className="setup-notice" role="status"><p>{notice}</p><button className="text-button" onClick={()=>setPractice(true)}>Open solo practice<ArrowRight size={15}/></button></div>}
-  <div className="home-footer"><button className="text-button" onClick={()=>setPractice(true)}>Try the canvas<ArrowRight size={15}/></button></div>
+  <div className="home-footer"><button className="text-button" onClick={()=>setPractice(true)}>Try the canvas</button></div>
  </main>}
  </Suspense>
  {how&&<HowTo close={()=>setHow(false)}/>}
