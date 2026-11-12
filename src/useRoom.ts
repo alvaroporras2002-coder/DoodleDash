@@ -23,7 +23,12 @@ export function useRoom(code:string,userId:string|undefined) {
     offset.current=Date.parse(next.serverNow)-(sent+Date.now())/2;snapshot.current=next;setState(next);setError('');
    } while(queued.current&&current===generation.current);
   }catch(e){if(current===generation.current)setError(e instanceof Error?e.message:'We could not refresh the room.');}
-  finally{pending.current=false;}
+  finally{
+   pending.current=false;
+   // A StrictMode effect restart can queue a refresh while the old RPC is in flight.
+   // Retry the queued refresh after the stale request releases its lock.
+   if(queued.current){queued.current=false;queueMicrotask(()=>void refresh());}
+  }
  },[code,userId]);
  useEffect(()=>{
   generation.current++;setState(null);snapshot.current=null;setError('');setConnected(false);live.current=false;
